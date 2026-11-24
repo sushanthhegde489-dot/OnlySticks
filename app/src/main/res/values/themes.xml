@@ -1,0 +1,5 @@
+<resources>
+    <style name="Theme.OnlySticks" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/meadow</item>
+    </style>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="game_services_project_id" translatable="false"></string>
+    <string name="event_pve_played" translatable="false"></string>
+    <string name="event_pve_won" translatable="false"></string>
+    <string name="event_pve_lost" translatable="false"></string>
+    <string name="event_pvp_played" translatable="false"></string>
+    <string name="event_pvp_won" translatable="false"></string>
+    <string name="event_packs_opened" translatable="false"></string>
+</resources>
