@@ -1,9 +1,12 @@
+// Database row for a trainer card.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.sushanth.onlysticks.domain.model.TrnrBuff
 
+/** A trainer: buff type, affinity/rank, win count and last step-claim info (for anti-cheat). */
 @Entity(tableName = "trainers")
 data class TrnrEntity(
     @PrimaryKey val id: String,

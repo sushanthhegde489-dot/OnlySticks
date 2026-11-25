@@ -1,3 +1,5 @@
+// Middle section of a full card: stat chips, move previews and item descriptions.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.card
 
 import androidx.compose.foundation.background
@@ -37,6 +39,7 @@ import com.sushanth.onlysticks.domain.stats.effectiveStats
 import com.sushanth.onlysticks.ui.components.GameIcos
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Durability / speed / attack chips for a stick. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun StatChips(stick: Stick) {
@@ -52,6 +55,7 @@ internal fun StatChips(stick: Stick) {
     }
 }
 
+/** One stat chip with an icon, label and value. */
 @Composable
 internal fun StatChip(icon: ImageVector, label: String, value: Int) {
     val c = GameTheme.colors
@@ -79,6 +83,7 @@ internal fun StatChip(icon: ImageVector, label: String, value: Int) {
     }
 }
 
+/** Table of the stick's moves with predicted damage and stamina cost. */
 @Composable
 internal fun MovesBox(stick: Stick) {
     val c = GameTheme.colors
@@ -130,6 +135,7 @@ internal fun MovesBox(stick: Stick) {
     }
 }
 
+/** Title and description box for power-ups and trainers. */
 @Composable
 internal fun ItemDesc(title: String, body: String) {
     val c = GameTheme.colors
@@ -139,6 +145,7 @@ internal fun ItemDesc(title: String, body: String) {
     }
 }
 
+/** Explanation text for a power-up type. */
 @Composable
 fun pwrUpDesc(type: PwrUpType): String = when (type) {
     PwrUpType.LIGHTER -> stringResource(R.string.powerup_lighter_desc, 40)
@@ -147,6 +154,7 @@ fun pwrUpDesc(type: PwrUpType): String = when (type) {
     )
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun StatChipsPrvw() {

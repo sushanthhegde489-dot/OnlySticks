@@ -1,3 +1,5 @@
+// Database-backed data source for the deck builder screen.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.repository
 
 import com.sushanth.onlysticks.domain.model.Card
@@ -8,12 +10,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
 
+/** Supplies owned cards and decks to the deck builder, seeding the starter collection on first use. */
 class RoomDeckBldrSrc(
     private val cardList: CardRepository,
     private val trnrs: TrainerRepository,
     private val decks: DeckRepository,
     private val seed: StartSeed,
 ) : DeckBldrSrc {
+    /** Owned cards plus trainers, as one list. */
     override fun observeOwnedCards(): Flow<List<Card>> =
         combine(cardList.observeCards(), trnrs.observeTrnrs()) { owned, records -> owned + records.map { it.trainer } }
             .onStart { seed.seedIfEmpty() }

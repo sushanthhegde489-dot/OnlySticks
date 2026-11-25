@@ -1,3 +1,5 @@
+// The game's custom vector icon set.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.components
 
 import androidx.compose.foundation.background
@@ -20,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/** All in-game icons, built lazily from code the first time they're used. */
 object GameIcos {
     val Jab: ImageVector by lazy { buildJab() }
     val Lunge: ImageVector by lazy { buildLunge() }
@@ -43,6 +46,7 @@ object GameIcos {
     val Star: ImageVector by lazy { buildStar() }
 }
 
+/** Android Studio preview showing every icon. */
 @OptIn(ExperimentalLayoutApi::class)
 @Preview(showBackground = true)
 @Composable

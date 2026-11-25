@@ -1,3 +1,5 @@
+// App-wide dependency container: creates the database, repositories and services once and hands them out.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks
 
 import android.content.Context
@@ -55,16 +57,24 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
+/**
+ * Manual dependency-injection container (one per app process, owned by [OnlySticksApplication]).
+ * Most members are lazy so nothing heavy is created until it's first needed.
+ */
 class AppCont(context: Context) {
     private val appContext = context.applicationContext
 
     val clock: Clock = Clock.systemDefaultZone()
 
+    /** Logs crashes in background jobs instead of killing the app. */
     private val errors = CoroutineExceptionHandler { _, e -> Log.e(TAG, "Background task failed", e) }
+    /** Long-lived scope for background work (database writes, backups) that outlives any screen. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + errors)
 
+    /** Signs card rows with a key from Android Keystore so tampered rows can be detected. */
     val signr: CardSigner by lazy { CardSigner.fromKeystore() }
 
+    /** Encrypted (SQLCipher) Room database. The passphrase is generated once and wrapped by a Keystore key. */
     val db: AppDatabase by lazy {
         val passphrase = DbPassphraseProvider(appContext.noBackupFilesDir, KsKeyWrap()).passphrase()
         DbFactory.create(appContext, passphrase)
@@ -85,6 +95,7 @@ class AppCont(context: Context) {
         AdminRepository(db, profileRepo, cardRepo, trainerRepo, coinsRepo, PackOpnr(), settRepo, clock)
     }
     val pvpNetwork by lazy { LanPvpNetwork(appContext) }
+    /** Offline "debug" sign-in is only allowed in debug builds. */
     val offlineSignInAllowed: Boolean get() = BuildConfig.DEBUG
     val shopRepo by lazy {
         ShopRepository(db, cardRepo, trainerRepo, coinsRepo, PackOpnr(), WklyCardStore(), settRepo, clock, statsRepo)
@@ -96,6 +107,7 @@ class AppCont(context: Context) {
         CloudBkp(googAcct, DriveBkpClient(), BackupRepository(db, cardRepo, profileRepo, statsRepo, clock), profileRepo, clock)
     }
 
+    /** Receives PvP match lifecycle callbacks and turns them into escrow/reward database writes. */
     val pvpSink: PvpMatchSink = object : PvpMatchSink {
         override fun onStarted(myBet: List<Stick>) {
             matchQueue.trySend { pvpRwds.hold(myBet) }
@@ -118,13 +130,16 @@ class AppCont(context: Context) {
         RoomDeckBldrSrc(cardRepo, trainerRepo, deckRepo, startSeed)
     }
 
+    /** Guards so start-up work runs only once per process, even if the activity is recreated. */
     private val settledUnfinished = AtomicBoolean(false)
     private val autoBkpStarted = AtomicBoolean(false)
 
+    /** Serial queue for match-related writes. Running them one at a time keeps escrow and rewards consistent. */
     private val matchQueue = Channel<suspend () -> Unit>(Channel.UNLIMITED).also { queue ->
         appScope.launch { for (job in queue) runCatching { job() }.onFailure { Log.e(TAG, "match write failed", it) } }
     }
 
+    /** Receives PvE (bot) match lifecycle callbacks and records rewards and stats. */
     val matchSink: MatchLifecycleSink = object : MatchLifecycleSink {
         override fun onMatchStarted(matchId: String, botTier: Int, trainerId: String?) {
             matchQueue.trySend { matchRwds.start(matchId, botTier, trainerId) }
@@ -142,6 +157,7 @@ class AppCont(context: Context) {
 
     val stpSrc: StpSrc by lazy { HpConnectStpSrc(appContext) }
     val stpSync by lazy { StpSync(db, stpSrc, trainerRepo, coinsRepo, clock) }
+    /** Lets WorkManager construct our workers with their dependencies. */
     val workerFactory: WorkerFactory = object : WorkerFactory() {
         override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker? =
             when (workerClassName) {
@@ -151,6 +167,10 @@ class AppCont(context: Context) {
             }
     }
 
+    /**
+     * Called from MainActivity.onCreate: settles matches left unfinished by a crash/kill, seeds starter data,
+     * refreshes admin status, and starts automatic cloud backups when data changes.
+     */
     fun onAppStart() {
         if (settledUnfinished.compareAndSet(false, true)) {
             matchQueue.trySend { matchRwds.settleUnfinished() }

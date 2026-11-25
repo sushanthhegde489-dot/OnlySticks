@@ -1,8 +1,11 @@
+// Vector icons for the combat moves.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/** Jab icon. */
 internal fun buildJab(): ImageVector = icoBldr("Jab").apply {
         chunkyPath(fillCol = Color(0xFFA86B38)) {
             moveTo(2f, 10.5f)
@@ -29,6 +32,7 @@ internal fun buildJab(): ImageVector = icoBldr("Jab").apply {
         }
 }.build()
 
+/** Lunge icon. */
 internal fun buildLunge(): ImageVector = icoBldr("Lunge").apply {
         chunkyPath(fillCol = Color(0xFFA86B38)) {
             moveTo(3f, 10.5f)
@@ -54,6 +58,7 @@ internal fun buildLunge(): ImageVector = icoBldr("Lunge").apply {
         }
 }.build()
 
+/** Parry icon. */
 internal fun buildParry(): ImageVector = icoBldr("Parry").apply {
         chunkyPath(fillCol = Color(0xFF7A4A24)) {
             moveTo(4f, 6.5f)
@@ -78,6 +83,7 @@ internal fun buildParry(): ImageVector = icoBldr("Parry").apply {
         }
 }.build()
 
+/** Slash icon. */
 internal fun buildSlash(): ImageVector = icoBldr("Slash").apply {
         chunkyPath(fillCol = Color(0xFFFFD23F)) {
             moveTo(3.5f, 17.5f)
@@ -98,6 +104,7 @@ internal fun buildSlash(): ImageVector = icoBldr("Slash").apply {
         }
 }.build()
 
+/** Rest icon. */
 internal fun buildRest(): ImageVector = icoBldr("Rest").apply {
         chunkyPath(fillCol = Color(0xFFFFE08A)) {
             moveTo(13f, 3.5f)
@@ -121,6 +128,7 @@ internal fun buildRest(): ImageVector = icoBldr("Rest").apply {
         }
 }.build()
 
+/** Exhaustion strike icon. */
 internal fun buildExhStrike(): ImageVector = icoBldr("ExhaustionStrike").apply {
         chunkyPath(fillCol = Color(0xFFC9A27A)) {
             moveTo(8.5f, 4f)

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Colours used outside Compose (the window background shown while the app starts). -->
+<!-- (Comments in this file were written by AI - Claude.) -->
 <resources>
     <color name="meadow">#FF6FAE4E</color>
 </resources>

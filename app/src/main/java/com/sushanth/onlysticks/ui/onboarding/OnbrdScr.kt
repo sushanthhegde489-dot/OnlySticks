@@ -1,3 +1,5 @@
+// First-run screen asking the player to choose a display name.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +30,7 @@ import com.sushanth.onlysticks.ui.components.OutlinedTxt
 import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Onboarding: pick a display name. */
 @Composable
 fun OnbrdScr(onSave: suspend (String) -> DispNameRes, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(24.dp), contentAlignment = Alignment.Center) {
@@ -47,6 +50,7 @@ fun OnbrdScr(onSave: suspend (String) -> DispNameRes, modifier: Modifier = Modif
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun OnbrdScrPrvw() {

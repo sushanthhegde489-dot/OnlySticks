@@ -1,3 +1,5 @@
+// The deck "shelf": the deck's slots, trainer slot and save button.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.deck
 
 import androidx.compose.foundation.background
@@ -35,8 +37,10 @@ import com.sushanth.onlysticks.ui.components.OutlinedTxt
 import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Number of card columns on the shelf. */
 private const val SHELF_COLUMNS = 4
 
+/** Shows the cards in the deck (tap to remove), the trainer slot, validation errors and the save button. */
 @Composable
 internal fun PinnedDeckShelf(
     state: DeckBldrUiState,
@@ -152,6 +156,7 @@ internal fun PinnedDeckShelf(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun PinnedDeckShelfPrvw() {

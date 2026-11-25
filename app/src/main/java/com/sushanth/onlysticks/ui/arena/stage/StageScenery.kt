@@ -1,3 +1,5 @@
+// Canvas drawing for the stage background.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena.stage
 
 import androidx.compose.foundation.layout.size
@@ -15,6 +17,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.sushanth.onlysticks.ui.theme.GameCols
 
+/** Sky gradient, sun, clouds, bushes and a wooden fence. */
 internal fun DrawScope.drawBackdrop(colors: GameCols, plankPath: Path) {
     val w = size.width
     val h = size.height
@@ -103,6 +106,7 @@ internal fun DrawScope.drawBackdrop(colors: GameCols, plankPath: Path) {
     }
 }
 
+/** Grass and the dirt fighting ring. */
 internal fun DrawScope.drawGround(colors: GameCols) {
     val w = size.width
     val h = size.height
@@ -135,6 +139,7 @@ internal fun DrawScope.drawGround(colors: GameCols) {
     )
 }
 
+/** Little sign board at the top of the stage that shows the round number. */
 internal fun DrawScope.drawRoundSignBoard(colors: GameCols) {
     val w = size.width
     val postW = 8.dp.toPx()

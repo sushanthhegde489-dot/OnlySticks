@@ -1,3 +1,5 @@
+// Secondary duel controls: stick switching, power-ups and target choice.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena
 
 import androidx.compose.foundation.horizontalScroll
@@ -31,6 +33,7 @@ import com.sushanth.onlysticks.ui.components.woodBoard
 import com.sushanth.onlysticks.ui.theme.DispFont
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Row of buttons to switch sticks or pick a power-up for this turn. */
 @Composable
 internal fun ExtrasRow(match: MatchUi, onSelectSwtch: (Int?) -> Unit, onSelectPwrUp: (Int?) -> Unit) {
     if (match.switchableSlots.isEmpty() && match.pwrUpSlots.isEmpty()) return
@@ -67,6 +70,7 @@ internal fun ExtrasRow(match: MatchUi, onSelectSwtch: (Int?) -> Unit, onSelectPw
     }
 }
 
+/** Lets the player choose who a selected power-up is used on. */
 @Composable
 internal fun PwrUpPanel(type: PwrUpType, target: PwrUpTarget?, onTarget: (PwrUpTarget) -> Unit) {
     val c = GameTheme.colors
@@ -83,6 +87,7 @@ internal fun PwrUpPanel(type: PwrUpType, target: PwrUpTarget?, onTarget: (PwrUpT
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun PwrUpPanelPrvw() {

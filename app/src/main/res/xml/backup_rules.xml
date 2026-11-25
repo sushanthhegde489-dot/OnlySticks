@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Android auto-backup rules (Android 11 and below): never back up the encrypted database files. -->
+<!-- Its key lives in this device's Keystore, so a restored copy would be unreadable. Drive backup is used instead. -->
+<!-- (Comments in this file were written by AI - Claude.) -->
 <full-backup-content>
     <exclude domain="database" path="stickdeck.db" />
     <exclude domain="database" path="stickdeck.db-wal" />

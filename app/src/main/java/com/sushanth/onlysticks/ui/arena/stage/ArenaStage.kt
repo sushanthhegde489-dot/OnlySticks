@@ -1,3 +1,5 @@
+// The animated fighting stage drawn on a Canvas: backdrop, two stick fighters and effects.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena.stage
 
 import androidx.compose.animation.core.LinearEasing
@@ -56,6 +58,10 @@ import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
+/**
+ * Draws the arena and replays the last round's events as animations.
+ * [onPbStart]/[onPbEnd] fire around each replay so the turn timer can pause while it plays.
+ */
 @Composable
 fun ArenaStage(
     you: Combatant?,
@@ -72,8 +78,10 @@ fun ArenaStage(
     val curOnStart by rememberUpdatedState(onPbStart)
     val curOnEnd by rememberUpdatedState(onPbEnd)
 
+    // Holds all animation state for the stage (survives recomposition).
     val fx = remember { StageFx() }
 
+    // Stand fighters back up when a new match starts (falls are kept only while a KO is on screen).
     LaunchedEffect(round, you?.alive, opp?.alive) {
         if (you?.alive != false && fx.p1Anim.fallDeg.value > 0f && pb == null) {
             fx.p1Anim.fallDeg.snapTo(0f)
@@ -84,6 +92,7 @@ fun ArenaStage(
     }
 
     val seq = pb?.seq
+    // Replays each new round exactly once (keyed by the playback sequence number).
     LaunchedEffect(seq) {
         val curPb = pb ?: return@LaunchedEffect
         curOnStart()
@@ -95,6 +104,7 @@ fun ArenaStage(
         }
     }
 
+    // Idle bobbing animation; disabled when the system animator scale is 0 (accessibility setting).
     val animrScl = remember(context, seq) { readAnimrScl(context) }
     val idlePhase: State<Float> = if (animrScl > 0f) {
         val infinite = rememberInfiniteTransition(label = "arena_idle")
@@ -111,6 +121,7 @@ fun ArenaStage(
         remember { mutableFloatStateOf(0f) }
     }
 
+    // Reusable Path objects so drawing doesn't allocate every frame.
     val plankPath = remember { Path() }
     val bandanaPath = remember { Path() }
     val flamePath = remember { Path() }
@@ -208,6 +219,7 @@ fun ArenaStage(
     }
 }
 
+/** Android Studio preview of the idle stage. */
 @Preview(name = "ArenaStageIdlePreview", widthDp = 360, heightDp = 260)
 @Composable
 internal fun ArenaStageIdlePrvw() {

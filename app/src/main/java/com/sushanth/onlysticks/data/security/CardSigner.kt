@@ -1,3 +1,5 @@
+// HMAC signing of card rows so edits made directly to the database can be detected.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.security
 
 import android.security.keystore.KeyGenParameterSpec
@@ -10,9 +12,12 @@ import javax.crypto.KeyGenerator
 import javax.crypto.Mac
 import javax.crypto.SecretKey
 
+/** Signs and verifies card data with HMAC-SHA256. [key] is supplied lazily so the Keystore is only touched when needed. */
 class CardSigner(private val key: () -> SecretKey) {
+    /** Hex HMAC of [fields]. */
     fun sign(fields: ByteArray): String = mac().doFinal(fields).toHex()
 
+    /** Constant-time check that [signature] matches [fields]. */
     fun verify(fields: ByteArray, signature: String): Boolean {
         val given = signature.hexToBytesOrNull() ?: return false
         return MessageDigest.isEqual(mac().doFinal(fields), given)
@@ -24,11 +29,13 @@ class CardSigner(private val key: () -> SecretKey) {
         const val ALIAS = "stickdeck.card.sign"
         private const val ALGORITHM = "HmacSHA256"
 
+        /** Signer backed by a non-exportable HMAC key in Android Keystore. */
         fun fromKeystore(alias: String = ALIAS): CardSigner {
             val key by lazy { ksKey(alias) }
             return CardSigner { key }
         }
 
+        /** Loads the key with this alias, generating it on first use. */
         private fun ksKey(alias: String): SecretKey {
             val ks = KeyStore.getInstance(KsKeyWrap.ANDROID_KEYSTORE).apply { load(null) }
             (ks.getEntry(alias, null) as? KeyStore.SecretKeyEntry)?.let { return it.secretKey }

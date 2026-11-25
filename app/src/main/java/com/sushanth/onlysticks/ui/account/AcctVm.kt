@@ -1,3 +1,5 @@
+// ViewModel for the account sheet: Google sign-in, Drive backup/restore and stats.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.account
 
 import android.app.Activity
@@ -28,8 +30,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * Drive operations that may need the user's consent before running.
+ * FIRST_SYNC runs right after sign-in; PEEK checks whether a backup exists before restoring.
+ */
 enum class DriveAction { BACKUP, RESTORE, FIRST_SYNC, PEEK }
 
+/** Everything the account sheet displays. */
 data class AcctUiState(
     val account: AcctState? = null,
     val googConfigured: Boolean = false,
@@ -43,6 +50,7 @@ data class AcctUiState(
     val offlineAllowed: Boolean = false,
 )
 
+/** Handles account actions. Long operations go through [work], which shows a busy state and reports errors. */
 class AcctVm(
     private val prof: ProfileRepository,
     private val goog: GoogAcctClient,
@@ -54,6 +62,7 @@ class AcctVm(
 ) : ViewModel() {
     private val _state = MutableStateFlow(AcctUiState(googConfigured = goog.isConfigured, offlineAllowed = offlineAllowed))
     val state: StateFlow<AcctUiState> = _state.asStateFlow()
+    /** Drive action waiting for the user to approve the consent screen. */
     private var pendAction: DriveAction? = null
 
     init {
@@ -61,8 +70,10 @@ class AcctVm(
         viewModelScope.launch { statsRepo.observe().collect { s -> _state.update { it.copy(stats = s) } } }
     }
 
+    /** Validates and saves a new display name. */
     suspend fun saveName(raw: String): DispNameRes = prof.setDispName(raw)
 
+    /** Signs in with Google. Switching to a different account resets the local collection; then checks Drive for a backup. */
     fun signIn(act: Activity) = work {
         val user = goog.signIn(act)
         val prevEmail = prof.observeAcct().first().googleEmail
@@ -79,6 +90,7 @@ class AcctVm(
         useDrive(DriveAction.FIRST_SYNC, user.email)
     }
 
+    /** Debug builds only: use the app without a Google account. */
     fun continueOffline() = work {
         if (!offlineAllowed) return@work
         sett.setFlag(SettingsRepository.OFFLINE_DEBUG, true)
@@ -86,6 +98,7 @@ class AcctVm(
         seed?.seedIfEmpty()
     }
 
+    /** Backs up before signing out. If the backup failed, asks the user to confirm signing out anyway. */
     fun signOut() = work {
         val saved = try {
             cloud.syncNow(force = true)
@@ -102,6 +115,7 @@ class AcctVm(
         finishSignOut()
     }
 
+    /** User confirmed signing out without a backup. */
     fun signOutAnyway() {
         _state.update { it.copy(confirmSignOut = false) }
         work { finishSignOut() }
@@ -109,6 +123,7 @@ class AcctVm(
 
     fun staySignedIn() = _state.update { it.copy(confirmSignOut = false) }
 
+    /** Unlinks the account, resets the collection to the starter set and clears saved credentials. */
     private suspend fun finishSignOut() {
         prof.setGoogEmail(null)
         prof.markBackedUp(null)
@@ -118,20 +133,25 @@ class AcctVm(
         _state.update { it.copy(message = uiTxt(R.string.acct_signed_out)) }
     }
 
+    /** Uploads a backup now. */
     fun bkp() = drive(DriveAction.BACKUP)
 
+    /** Looks for a backup and asks the user to confirm restoring it. */
     fun askRest() = drive(DriveAction.PEEK)
 
+    /** User confirmed the restore. */
     fun restore() {
         _state.update { it.copy(confirmRest = false, bkpInfo = null) }
         drive(DriveAction.RESTORE)
     }
 
+    /** User declined the restore; make sure they at least have starter cards. */
     fun dismissRest() {
         _state.update { it.copy(confirmRest = false, bkpInfo = null) }
         work { seed?.seedIfEmpty() }
     }
 
+    /** Called with the result of the Drive consent screen; continues the pending action if access was granted. */
     fun onConsentRes(data: Intent?) {
         _state.update { it.copy(consent = null) }
         val action = pendAction ?: return
@@ -143,6 +163,7 @@ class AcctVm(
 
     private fun drive(action: DriveAction) = work { useDrive(action, _state.value.account?.googleEmail) }
 
+    /** Gets a Drive token for [email], or asks for consent and remembers the action to continue later. */
     private suspend fun useDrive(action: DriveAction, email: String?) {
         if (email == null) return
         when (val access = goog.driveAccess(email)) {
@@ -154,6 +175,7 @@ class AcctVm(
         }
     }
 
+    /** Performs a Drive action once a token is available. */
     private suspend fun run(action: DriveAction, token: String) {
         when (action) {
             DriveAction.BACKUP -> {
@@ -180,6 +202,7 @@ class AcctVm(
         }
     }
 
+    /** Runs [block] in the background with a busy indicator, ignoring new requests while one is running. */
     private fun work(block: suspend () -> Unit) {
         if (_state.value.busy) return
         _state.update { it.copy(busy = true, message = null) }

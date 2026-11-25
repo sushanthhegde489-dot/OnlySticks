@@ -1,3 +1,5 @@
+// Full-size card layout: header with name and value, artwork, stats/moves and footer.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.card
 
 import androidx.compose.foundation.background
@@ -66,6 +68,10 @@ import com.sushanth.onlysticks.ui.theme.ItemFrameCols
 import com.sushanth.onlysticks.ui.theme.RarCodeStyle
 import com.sushanth.onlysticks.ui.theme.rarFrameCols
 
+/**
+ * Full card view. [apprVal] is the coin value shown in the header; [trnrSynergy] highlights the footer.
+ * When [editable], tapping the name lets the player set a nickname.
+ */
 @Composable
 fun PokemonCardV(
     card: Card,
@@ -142,6 +148,7 @@ fun PokemonCardV(
     }
 }
 
+/** Card header: rarity code, (editable) name and appraisal value. */
 @Composable
 internal fun CardHdr(
     card: Card,
@@ -225,6 +232,7 @@ internal fun CardHdr(
     }
 }
 
+/** Inline nickname editor. Empty input resets to [defName]. */
 @Composable
 internal fun NickField(
     initial: String,
@@ -275,6 +283,7 @@ internal fun NickField(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun CardHdrPrvw() {
@@ -293,6 +302,7 @@ private fun CardHdrPrvw() {
     }
 }
 
+/** Card footer, highlighted when a trainer boosts this card. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun CardFtr(trnrSynergy: Boolean, colors: FrameCols) {
@@ -327,6 +337,7 @@ internal fun CardFtr(trnrSynergy: Boolean, colors: FrameCols) {
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun CardFtrPrvw() {

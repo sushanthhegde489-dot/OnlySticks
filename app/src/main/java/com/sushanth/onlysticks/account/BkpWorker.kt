@@ -1,3 +1,5 @@
+// Background job that uploads a backup to Google Drive.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.account
 
 import android.content.Context
@@ -7,6 +9,7 @@ import androidx.work.WorkerParameters
 import com.sushanth.onlysticks.data.backup.DriveHttpException
 import kotlinx.coroutines.CancellationException
 
+/** WorkManager job that runs [CloudBkp.syncNow]. Retries up to MAX_TRIES times on retryable errors. */
 class BkpWorker(
     context: Context,
     params: WorkerParameters,

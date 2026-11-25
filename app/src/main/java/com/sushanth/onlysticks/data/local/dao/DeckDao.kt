@@ -1,3 +1,5 @@
+// Database access for decks and their card slots.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.local.dao
 
 import androidx.room.Dao
@@ -11,12 +13,15 @@ import com.sushanth.onlysticks.data.local.entity.DeckSlotEntity
 import com.sushanth.onlysticks.data.local.entity.DeckWithSlots
 import kotlinx.coroutines.flow.Flow
 
+/** Queries for decks. Decks and slots are loaded together as [DeckWithSlots]. */
 @Dao
 interface DeckDao {
+    /** Live list of all decks with their slots. */
     @Transaction
     @Query("SELECT * FROM decks")
     fun observeDecks(): Flow<List<DeckWithSlots>>
 
+    /** Live view of one deck. */
     @Transaction
     @Query("SELECT * FROM decks WHERE id = :id")
     fun observeDeck(id: String): Flow<DeckWithSlots?>
@@ -30,6 +35,7 @@ interface DeckDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSlots(slots: List<DeckSlotEntity>)
 
+    /** Atomically replaces every slot in a deck. */
     @Transaction
     suspend fun replaceSlots(deckId: String, slots: List<DeckSlotEntity>) {
         deleteSlotsByDeckId(deckId)

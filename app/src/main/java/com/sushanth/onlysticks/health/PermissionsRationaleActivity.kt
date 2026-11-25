@@ -1,3 +1,5 @@
+// Screen Health Connect opens to explain why the app wants step data.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.health
 
 import android.os.Bundle
@@ -18,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.sushanth.onlysticks.R
 import com.sushanth.onlysticks.ui.theme.OnlySticksTheme
 
+/** Required by Health Connect: shows a short explanation of how steps are used, with a close button. */
 class PermissionsRationaleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

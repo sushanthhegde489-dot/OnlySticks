@@ -1,8 +1,11 @@
+// Vector icons for items: coin, flame, water drop, broken stick and star.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/** Gold coin icon. */
 internal fun buildCoin(): ImageVector = icoBldr("Coin").apply {
         chunkyPath(fillCol = Color(0xFFA8790F)) {
             moveTo(12f, 3.5f)
@@ -36,6 +39,7 @@ internal fun buildCoin(): ImageVector = icoBldr("Coin").apply {
         }
 }.build()
 
+/** Flame icon (lighter / burning). */
 internal fun buildFlame(): ImageVector = icoBldr("Flame").apply {
         chunkyPath(fillCol = Color(0xFFFF7A2F)) {
             moveTo(12f, 3f)
@@ -55,6 +59,7 @@ internal fun buildFlame(): ImageVector = icoBldr("Flame").apply {
         }
 }.build()
 
+/** Water drop icon (water bottle / wet). */
 internal fun buildDrop(): ImageVector = icoBldr("Drop").apply {
         chunkyPath(fillCol = Color(0xFF4FB3E8)) {
             moveTo(12f, 3.5f)
@@ -70,6 +75,7 @@ internal fun buildDrop(): ImageVector = icoBldr("Drop").apply {
         }
 }.build()
 
+/** Snapped stick icon (broken). */
 internal fun buildBrkn(): ImageVector = icoBldr("Broken").apply {
         chunkyPath(fillCol = Color(0xFFA86B38)) {
             moveTo(3.5f, 18f)
@@ -97,6 +103,7 @@ internal fun buildBrkn(): ImageVector = icoBldr("Broken").apply {
         }
 }.build()
 
+/** Star icon. */
 internal fun buildStar(): ImageVector = icoBldr("Star").apply {
         chunkyPath(fillCol = Color(0xFFFFD23F)) {
             moveTo(12f, 2.5f)

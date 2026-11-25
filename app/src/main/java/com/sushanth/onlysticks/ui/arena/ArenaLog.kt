@@ -1,3 +1,5 @@
+// Turns combat events into human-readable battle log lines.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena
 
 import com.sushanth.onlysticks.R
@@ -7,13 +9,18 @@ import com.sushanth.onlysticks.ui.card.lblRes
 import com.sushanth.onlysticks.ui.common.UiTxt
 import com.sushanth.onlysticks.ui.common.uiTxt
 
+/** Converts [CombatEvt]s into localised log text. P1 is always "you". */
 object ArenaLog {
+    /** "You" or "Opponent". */
     fun who(plr: PlrId): UiTxt = uiTxt(if (plr == PlrId.P1) R.string.arena_you else R.string.arena_opp)
 
+    /** Chooses between the "you" and "opponent" version of a string. */
     private fun pick(plr: PlrId, youRes: Int, oppRes: Int): Int = if (plr == PlrId.P1) youRes else oppRes
 
+    /** Slots are shown 1-based. */
     private fun slot(index: Int): Int = index + 1
 
+    /** Log line for one event. */
     fun line(evt: CombatEvt): UiTxt = when (evt) {
         is CombatEvt.Swtch -> if (evt.automatic) {
             uiTxt(pick(evt.plr, R.string.log_swtch_auto_you, R.string.log_swtch_auto_opp), slot(evt.toSlot))
@@ -43,5 +50,6 @@ object ArenaLog {
         is CombatEvt.KnockedOut -> uiTxt(pick(evt.winner, R.string.log_knocked_out_you, R.string.log_knocked_out_opp))
     }
 
+    /** Log lines for a list of events. */
     fun lines(evts: List<CombatEvt>): List<UiTxt> = evts.map(::line)
 }

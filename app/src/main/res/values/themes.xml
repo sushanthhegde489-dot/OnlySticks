@@ -1,3 +1,5 @@
+<!-- Base Android theme; the real UI theme is applied in Compose (ui/theme/Theme.kt). -->
+<!-- (Comments in this file were written by AI - Claude.) -->
 <resources>
     <style name="Theme.OnlySticks" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/meadow</item>

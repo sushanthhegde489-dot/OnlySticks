@@ -1,3 +1,5 @@
+// Daily background job that turns yesterday's steps into rewards.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.health
 
 import android.content.Context
@@ -9,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import java.util.concurrent.TimeUnit
 
+/** WorkManager job that runs [StpSync]. Never retries; missing permission or Health Connect just skips the day. */
 class StepSyncWorker(
     context: Context,
     params: WorkerParameters,
@@ -34,9 +37,11 @@ class StepSyncWorker(
     }
 }
 
+/** Schedules the daily step sync. */
 object StpSyncScheduler {
     const val UNIQUE_NAME = "step-sync-daily"
 
+    /** Enqueues the periodic job once (KEEP means re-scheduling on each launch doesn't reset it). */
     fun schedule(context: Context) {
         val request = PeriodicWorkRequestBuilder<StepSyncWorker>(24, TimeUnit.HOURS).build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(UNIQUE_NAME, ExistingPeriodicWorkPolicy.KEEP, request)

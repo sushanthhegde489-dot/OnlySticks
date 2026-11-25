@@ -1,3 +1,5 @@
+// ViewModel for local-network PvP: hosting, joining, discovery and running the match in lockstep.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.pvp
 
 import androidx.annotation.StringRes
@@ -43,13 +45,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * Runs a PvP match over the LAN. Both devices simulate the same deterministic combat from a shared seed,
+ * exchanging only their turn actions (via commit-reveal), so neither side has to trust the other's results.
+ * The host is always P1 in the canonical state; the guest sees a flipped view via [Perspective].
+ */
 class PvpMatchVm(
     private val network: LanPvpNetwork,
     private val localAddr: () -> String? = { null },
     private val sink: PvpMatchSink = PvpMatchSink.NONE,
     private val turnDurMs: Long = Cfg.TURN_TIMER_MS,
 ) : ViewModel(), DuelCtrl {
+    /** Connection progress shown by the PvP lobby. */
     private val _phase = MutableStateFlow<PvpPhase>(PvpPhase.Idle)
+    /** Games found on the network while browsing. */
     private val _nearby = MutableStateFlow<List<LanHost>>(emptyList())
     val nearbyHosts: StateFlow<List<LanHost>> = _nearby.asStateFlow()
     private var browsing: Job? = null
@@ -64,12 +73,16 @@ class PvpMatchVm(
     private var job: Job? = null
     private var sess: PvpSess? = null
     private var server: TcpHost? = null
+    /** The match state in host (P1) perspective, which both devices compute identically. */
     private var canonical: CombatState? = null
+    /** Shared-seed RNG for combat. */
     private var rng: DeterministicRng? = null
+    /** This device's seat: P1 when hosting, P2 when joining. */
     private var seat = PlrId.P1
     private var mine: Loadout? = null
     private var theirs: Loadout? = null
 
+    /** Opens a server, advertises it on the network, waits for one opponent and then plays. */
     fun host(name: String, deck: Deck, bet: List<Stick>) = launchConn {
         val listening = runCatching { network.host() }.getOrElse { fail(PvpFailure.CANNOT_HOST); return@launchConn }
         server = listening
@@ -80,6 +93,7 @@ class PvpMatchVm(
         play(chan, PlrId.P1, name, deck, bet)
     }
 
+    /** Connects to a host at [address] and plays. */
     fun join(address: String, name: String, deck: Deck, bet: List<Stick>, port: Int = Cfg.Pvp.PORT) = launchConn {
         _phase.value = PvpPhase.Joining
         stopBrowsing()
@@ -87,6 +101,7 @@ class PvpMatchVm(
         play(chan, PlrId.P2, name, deck, bet)
     }
 
+    /** Starts listing nearby games. */
     fun startBrowsing() {
         if (browsing?.isActive == true) return
         browsing = viewModelScope.launch {
@@ -94,6 +109,7 @@ class PvpMatchVm(
         }
     }
 
+    /** Stops listing nearby games. */
     fun stopBrowsing() {
         browsing?.cancel()
         browsing = null
@@ -105,6 +121,7 @@ class PvpMatchVm(
         advert = null
     }
 
+    /** Abandons any connection or match and returns to the idle lobby. */
     fun cancel() {
         job?.cancel()
         closeSess()
@@ -112,6 +129,7 @@ class PvpMatchVm(
         _state.value = ArenaUiState(canRematch = false)
     }
 
+    /** Leaves a finished match (does nothing while it's still running). */
     override fun leaveMatch() {
         if (_state.value.match?.isOver == false) return
         cancel()
@@ -128,6 +146,7 @@ class PvpMatchVm(
     override fun selectPwrUpTarget(target: PwrUpTarget): Boolean =
         editRound(R.string.arena_notice_illegal_powerup) { if (it.selPwrUpSlot != null) it.copy(selPwrUpTarget = target) else null }
 
+    /** Commits the selected action and waits for the opponent's. */
     override fun sbmt(): Boolean {
         val match = openRound() ?: return false
         val action = match.action() ?: return false
@@ -136,6 +155,7 @@ class PvpMatchVm(
         return true
     }
 
+    /** Advances the turn timer, auto-submitting a skip when time runs out. Shows "ready" once the peer has committed. */
     override fun onTmrTick(elapsedMs: Long) {
         val match = openRound() ?: return
         val (next, evt) = _tmr.value.tick(elapsedMs)
@@ -152,10 +172,12 @@ class PvpMatchVm(
 
     override fun resumeTmr() { if (openRound() != null) _tmr.value = _tmr.value.resume() }
 
+    /** Closes the connection when the ViewModel is destroyed. */
     override fun onCleared() {
         closeSess()
     }
 
+    /** Runs a connection job (one at a time) and turns errors into a failed phase. */
     private fun launchConn(block: suspend () -> Unit) {
         if (job?.isActive == true) return
         job = viewModelScope.launch {
@@ -171,6 +193,7 @@ class PvpMatchVm(
         }
     }
 
+    /** Full match setup: handshake, nonce exchange, loadout exchange and validation, escrow, then the first round. */
     private suspend fun play(chan: LineChan, seat: PlrId, name: String, deck: Deck, bet: List<Stick>) {
         this.seat = seat
         _phase.value = PvpPhase.Handshaking
@@ -198,6 +221,7 @@ class PvpMatchVm(
         _phase.value = PvpPhase.InMatch
     }
 
+    /** Exchanges this round's action with the opponent in the background, then resolves the round. */
     private fun send(match: MatchUi, action: TurnAction) {
         val s = sess ?: return
         val round = match.combat.round
@@ -216,6 +240,7 @@ class PvpMatchVm(
         }
     }
 
+    /** Resolves a round with both actions (ordered as P1, P2) and updates this device's view of it. */
     private fun resolve(myAction: TurnAction, theirAction: TurnAction) {
         val before = canonical ?: return
         val (a1, a2) = if (seat == PlrId.P1) myAction to theirAction else theirAction to myAction
@@ -235,6 +260,7 @@ class PvpMatchVm(
         }
     }
 
+    /** Ends the session with an error. A match that had started is voided so staked cards are released. */
     private fun fail(reason: PvpFailure) {
         if (_state.value.match?.isOver == true) return
         if (_state.value.match != null) sink.onVoided()
@@ -243,6 +269,7 @@ class PvpMatchVm(
         _phase.value = PvpPhase.Failed(reason)
     }
 
+    /** Stops advertising and closes the server and session. */
     private fun closeSess() {
         stopAdvertising()
         server?.close()
@@ -251,8 +278,10 @@ class PvpMatchVm(
         sess = null
     }
 
+    /** The current round if the player can still change their selection. */
     private fun openRound(): MatchUi? = _state.value.match?.takeUnless { it.isOver || it.waitForOpp }
 
+    /** Applies [change] to the current selection, or shows [illegalNotice] if it returns null. */
     private fun editRound(@StringRes illegalNotice: Int, change: (MatchUi) -> MatchUi?): Boolean {
         val match = openRound() ?: return false
         val next = change(match)

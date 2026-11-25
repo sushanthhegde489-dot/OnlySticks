@@ -1,3 +1,5 @@
+// JSON format for backup files stored on Google Drive.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.backup
 
 import com.sushanth.onlysticks.data.local.entity.CoinsLdgrEntity
@@ -15,9 +17,12 @@ import com.sushanth.onlysticks.domain.model.TuningFlag
 import org.json.JSONArray
 import org.json.JSONObject
 
+/** Thrown when a backup file can't be read (damaged, or from a newer app version). */
 class BkpFormatException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
+/** Serialises [BkpSnap] to JSON and back using Android's built-in org.json. */
 object BkpJson {
+    /** Snapshot to JSON text. */
     fun encode(s: BkpSnap): String = JSONObject()
         .put("version", s.version)
         .put("exportedAt", s.exportedAt)
@@ -30,6 +35,7 @@ object BkpJson {
         .put("stats", JSONObject(s.stats))
         .toString()
 
+    /** JSON text to snapshot. Any parsing failure becomes a [BkpFormatException]. */
     fun decode(text: String): BkpSnap = try {
         val o = JSONObject(text)
         val version = o.getInt("version")
@@ -51,6 +57,7 @@ object BkpJson {
         throw BkpFormatException("backup file is damaged", e)
     }
 
+    /** Card to JSON. The "kind" field says which card type it is. */
     private fun card(c: TimedCard): JSONObject {
         val o = JSONObject().put("id", c.card.id).put("createdAt", c.createdAt).put("name", c.card.customName ?: JSONObject.NULL)
         return when (val card = c.card) {
@@ -62,6 +69,7 @@ object BkpJson {
         }
     }
 
+    /** JSON to card. Trainers are stored in the separate "trainers" array, so only sticks and power-ups appear here. */
     private fun card(o: JSONObject): TimedCard {
         val id = o.getString("id")
         val name = o.optStrOrNull("name")
@@ -111,9 +119,12 @@ object BkpJson {
     private fun ldgrRow(o: JSONObject) =
         CoinsLdgrEntity(amount = o.getLong("amount"), reason = o.getString("reason"), timestamp = o.getLong("timestamp"), claimDate = o.optStrOrNull("claimDate"))
 
+    /** Maps a list to a JSONArray. */
     private fun <T> List<T>.toJson(f: (T) -> JSONObject) = JSONArray().also { a -> forEach { a.put(f(it)) } }
 
+    /** Maps a JSONArray of objects to a list. */
     private fun <T> JSONArray.map(f: (JSONObject) -> T): List<T> = (0 until length()).map { f(getJSONObject(it)) }
 
+    /** Reads a string field, treating JSON null as Kotlin null. */
     private fun JSONObject.optStrOrNull(key: String): String? = if (isNull(key)) null else optString(key)
 }

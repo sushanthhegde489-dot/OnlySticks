@@ -1,3 +1,5 @@
+// ViewModel for the shop tab.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.shop
 
 import androidx.lifecycle.ViewModel
@@ -22,8 +24,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Tabs in the shop. */
 enum class ShopTab { PACKS, CARDS }
 
+/** Shop state. [shown] holds cards currently being revealed. */
 data class ShopUiState(
     val tab: ShopTab = ShopTab.PACKS,
     val cardStore: CardStoreState? = null,
@@ -32,11 +36,13 @@ data class ShopUiState(
     val busy: Boolean = false
 )
 
+/** Handles purchases and keeps the weekly store up to date by re-checking the store window every [refrMs]. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ShopVm(private val shop: ShopRepository, refrMs: Long = 30_000L) : ViewModel() {
     private val _state = MutableStateFlow(ShopUiState())
     val state: StateFlow<ShopUiState> = _state.asStateFlow()
 
+    /** Polls the store window; when it changes (opens, closes or refreshes) switches to the new offers. */
     init {
         viewModelScope.launch {
             flow { while (true) { emit(shop.curWin()); delay(refrMs) } }
@@ -46,8 +52,10 @@ class ShopVm(private val shop: ShopRepository, refrMs: Long = 30_000L) : ViewMod
         }
     }
 
+    /** Switches tab. */
     fun selectTab(tab: ShopTab) = _state.update { it.copy(tab = tab) }
 
+    /** Buys and opens a pack. */
     fun buyPack(type: PackType) = buy {
         when (val result = shop.buyPack(type)) {
             is PackBuy.Opened -> _state.update { it.copy(shown = result.result.cardList) }
@@ -55,6 +63,7 @@ class ShopVm(private val shop: ShopRepository, refrMs: Long = 30_000L) : ViewMod
         }
     }
 
+    /** Buys the store card in [slot]. */
     fun buyCard(slot: Int) = buy {
         val result = shop.buyCard(slot)
         _state.update {
@@ -67,8 +76,10 @@ class ShopVm(private val shop: ShopRepository, refrMs: Long = 30_000L) : ViewMod
         }
     }
 
+    /** Closes the reveal overlay. */
     fun dismissShow() = _state.update { it.copy(shown = null) }
 
+    /** Runs a purchase in the background, ignoring taps while one is in progress. */
     private fun buy(block: suspend () -> Unit) {
         if (_state.value.busy) return
         _state.update { it.copy(busy = true, message = null) }

@@ -1,3 +1,5 @@
+// Generates random decks for bot opponents.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.pve
 
 import com.sushanth.onlysticks.domain.config.Cfg
@@ -10,7 +12,9 @@ import com.sushanth.onlysticks.domain.model.TuningFlag
 import com.sushanth.onlysticks.domain.rng.DeterministicRng
 import com.sushanth.onlysticks.domain.stats.StatGen
 
+/** Builds bot decks whose rarity scales with the difficulty tier. */
 object BotDeckGenerator {
+    /** A full deck of sticks, plus 1-2 power-ups at tiers that use them. */
     fun gen(tier: Int, rng: DeterministicRng): List<Card> {
         val diff = BotDifficulty(tier)
         val pwrUps = if (diff.usesPwrUps) rng.nextInt(Cfg.Bots.POWERUP_COUNT) else 0
@@ -23,9 +27,11 @@ object BotDeckGenerator {
         }
         return sticks + items
     }
+    /** Picks a rarity using this tier's weights. */
     internal fun rndRar(diff: BotDifficulty, rng: DeterministicRng): Rarity =
         Rarity.entries[rng.weightedIdx(diff.rarWeights)]
 
+    /** Rolls a random stick with random tuning flags. */
     internal fun rndStick(id: String, diff: BotDifficulty, rng: DeterministicRng): Stick {
         val rarity = rndRar(diff, rng)
         val base = StatGen.roll(rarity, rng)

@@ -1,3 +1,5 @@
+// Claims step rewards for the previous day.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.health
 
 import androidx.room.withTransaction
@@ -12,12 +14,14 @@ import com.sushanth.onlysticks.domain.economy.StepRewards
 import java.time.Clock
 import java.time.LocalDate
 
+/** What happened when step sync ran. */
 sealed interface StpSyncOutcome {
     data object NoPerm : StpSyncOutcome
     data class Claimed(val date: LocalDate, val stps: Long, val affinity: Int, val coins: Int, val trainerId: String?) : StpSyncOutcome
     data class Rejected(val date: LocalDate, val reason: ClaimRejection) : StpSyncOutcome
 }
 
+/** Reads yesterday's steps and, if not already claimed, awards coins and trainer affinity. */
 class StpSync(
     private val db: AppDatabase,
     private val stps: StpSrc,
@@ -25,6 +29,7 @@ class StpSync(
     private val coinsRepo: CoinsRepository,
     private val clock: Clock,
 ) {
+    /** Claims yesterday's steps. Anti-cheat uses the latest claim from both trainers and the coin ledger. */
     suspend fun run(): StpSyncOutcome {
         if (!stps.hasPerm()) return StpSyncOutcome.NoPerm
         val zone = clock.zone

@@ -1,3 +1,5 @@
+// App theme: Material 3 colours plus the game's own palette.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -10,8 +12,10 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
+/** Provides the current [GameCols] to composables. */
 private val LocalGameCols = staticCompositionLocalOf { DayGameCols }
 
+/** Builds a Material colour scheme from the game palette. */
 private fun schemeFor(c: GameCols, dark: Boolean) = if (dark) {
     darkColorScheme(
         primary = c.leafLight, onPrimary = c.outline,
@@ -34,6 +38,7 @@ private fun schemeFor(c: GameCols, dark: Boolean) = if (dark) {
     )
 }
 
+/** Wraps content in the game's theme; switches to the night palette in dark mode. */
 @Composable
 fun OnlySticksTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) NightGameCols else DayGameCols
@@ -46,6 +51,7 @@ fun OnlySticksTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compos
     }
 }
 
+/** Access to the game palette from any composable: GameTheme.colors. */
 object GameTheme {
     val colors: GameCols
         @Composable @ReadOnlyComposable get() = LocalGameCols.current

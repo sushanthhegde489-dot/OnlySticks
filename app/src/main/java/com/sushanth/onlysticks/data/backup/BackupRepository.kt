@@ -1,3 +1,5 @@
+// Converts the local database to and from a backup snapshot.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.backup
 
 import androidx.room.withTransaction
@@ -10,6 +12,7 @@ import com.sushanth.onlysticks.data.repository.StatsRepository
 import kotlinx.coroutines.flow.first
 import java.time.Clock
 
+/** Builds backup snapshots from the database and restores them. */
 class BackupRepository(
     private val db: AppDatabase,
     private val cardList: CardRepository,
@@ -17,6 +20,7 @@ class BackupRepository(
     private val stats: StatsRepository,
     private val clock: Clock,
 ) {
+    /** Reads all cards, trainers, decks, coin ledger, store purchases and stats in one transaction. */
     suspend fun export(): BkpSnap = db.withTransaction {
         val owned = cardList.observeCards().first()
         val createdAt = db.cardDao().getAll().associate { it.id to it.createdAt }
@@ -35,6 +39,11 @@ class BackupRepository(
         )
     }
 
+    /**
+     * Replaces the local collection with [snap] in one transaction.
+     * Deck slots/trainers that point at missing cards are dropped; ledger ids are regenerated.
+     * The display name is only restored if none is set locally.
+     */
     suspend fun restore(snap: BkpSnap) = db.withTransaction {
         db.clearPlrColl()
         snap.cardList.forEach { cardList.save(it.card, it.createdAt) }

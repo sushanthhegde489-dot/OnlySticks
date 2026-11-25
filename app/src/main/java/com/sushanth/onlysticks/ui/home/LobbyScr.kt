@@ -1,3 +1,5 @@
+// Battle tab home screen: deck summary, bot difficulty ladder and play buttons.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.home
 
 import androidx.annotation.StringRes
@@ -67,6 +69,7 @@ import com.sushanth.onlysticks.ui.theme.DispFont
 import com.sushanth.onlysticks.ui.theme.GameTheme
 import com.sushanth.onlysticks.ui.theme.OnlySticksTheme
 
+/** Name string for each bot tier. */
 @StringRes
 fun botNameRes(tier: Int): Int = when (tier) {
     1 -> R.string.bot_name_1
@@ -76,6 +79,7 @@ fun botNameRes(tier: Int): Int = when (tier) {
     else -> R.string.bot_name_5
 }
 
+/** Short description string for each bot tier. */
 @StringRes
 private fun botBlurbRes(tier: Int): Int = when (tier) {
     1 -> R.string.bot_blurb_1
@@ -85,6 +89,7 @@ private fun botBlurbRes(tier: Int): Int = when (tier) {
     else -> R.string.bot_blurb_5
 }
 
+/** Lobby: shows the current deck, lets the player pick a bot tier, start a battle, edit the deck or play a friend. */
 @Composable
 fun LobbyScr(
     deck: Deck?,
@@ -190,6 +195,7 @@ fun LobbyScr(
     }
 }
 
+/** Ladder of the five bot opponents; tap one to select it. */
 @Composable
 private fun OppLadder(selTier: Int, onSelectTier: (Int) -> Unit) {
     val c = GameTheme.colors
@@ -243,6 +249,7 @@ private fun OppLadder(selTier: Int, onSelectTier: (Int) -> Unit) {
     }
 }
 
+/** Android Studio preview. */
 @Preview(showBackground = true)
 @Composable
 private fun LobbyScrPrvw() {

@@ -1,3 +1,5 @@
+// Google sign-in (Credential Manager) and Drive authorisation.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.account
 
 import android.accounts.Account
@@ -20,18 +22,23 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+/** Basic info about a signed-in Google user. */
 data class GoogUser(val email: String, val name: String?)
 
+/** Result of asking for Drive access: a token, or an intent the user must approve first. */
 sealed interface DriveAccess {
     data class Granted(val token: String) : DriveAccess
     data class NeedsConsent(val intent: PendingIntent) : DriveAccess
 }
 
+/** Wraps Google sign-in and Drive app-data authorisation. [webClientId] comes from local.properties. */
 class GoogAcctClient(context: Context, private val webClientId: String) {
     private val appContext = context.applicationContext
 
+    /** False when no OAuth client id was configured at build time. */
     val isConfigured: Boolean get() = webClientId.isNotBlank()
 
+    /** Shows the "Sign in with Google" sheet and returns the chosen account. */
     suspend fun signIn(act: Activity): GoogUser {
         val opt = GetSignInWithGoogleOption.Builder(webClientId).build()
         val request = GetCredentialRequest.Builder().addCredentialOption(opt).build()
@@ -43,10 +50,12 @@ class GoogAcctClient(context: Context, private val webClientId: String) {
         return GoogUser(goog.id, goog.displayName)
     }
 
+    /** Clears saved credentials so the account chooser shows next time. */
     suspend fun signOut() {
         CredentialManager.create(appContext).clearCredentialState(ClearCredentialStateRequest())
     }
 
+    /** Requests the drive.appdata scope for [email]. */
     suspend fun driveAccess(email: String): DriveAccess = access(
         Identity.getAuthorizationClient(appContext).authorize(
             AuthorizationRequest.builder()
@@ -56,6 +65,7 @@ class GoogAcctClient(context: Context, private val webClientId: String) {
         ).await(),
     )
 
+    /** Reads the access token after the user approved the consent screen. */
     fun tokenFromConsent(data: Intent?): String? =
         runCatching { Identity.getAuthorizationClient(appContext).getAuthorizationResultFromIntent(data).accessToken }.getOrNull()
 
@@ -71,6 +81,7 @@ class GoogAcctClient(context: Context, private val webClientId: String) {
     }
 }
 
+/** Suspends until a Play Services [Task] completes. */
 internal suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { cont ->
     addOnSuccessListener { cont.resume(it) }
     addOnFailureListener { cont.resumeWithException(it) }

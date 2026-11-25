@@ -1,3 +1,5 @@
+// Finds and advertises PvP games on the local Wi-Fi network using Android NSD (mDNS / DNS-SD).
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.net
 
 import android.content.Context
@@ -19,14 +21,18 @@ import java.net.Inet4Address
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 
+/** Local-network PvP: hosting, joining by address, advertising a game and discovering nearby games. */
 class LanPvpNetwork(context: Context) {
     private val nsd = context.applicationContext.getSystemService(NsdManager::class.java)
     private val resLock = Mutex()
 
+    /** Starts a TCP server for an opponent to join. */
     fun host() = TcpHost()
 
+    /** Connects to a host at [address]. */
     suspend fun join(address: String, port: Int = Cfg.Pvp.PORT) = TcpClient.connect(address.trim(), port)
 
+    /** Advertises a hosted game named [name] with its stake value. Close the returned handle to stop advertising. */
     fun advertise(name: String, port: Int, betVal: Int): AutoCloseable {
         val info = NsdServiceInfo().apply {
             serviceName = SERVICE_PREFIX + name.take(MAX_NAME)
@@ -44,6 +50,7 @@ class LanPvpNetwork(context: Context) {
         return AutoCloseable { runCatching { nsd.unregisterService(lstnr) } }
     }
 
+    /** Live list of OnlySticks games found on the network. Each service is resolved to an IPv4 address. */
     fun discover(): Flow<List<LanHost>> = callbackFlow {
         val found = linkedMapOf<String, LanHost>()
         val lstnr = object : NsdManager.DiscoveryListener {
@@ -68,6 +75,7 @@ class LanPvpNetwork(context: Context) {
         awaitClose { runCatching { nsd.stopServiceDiscovery(lstnr) } }
     }
 
+    /** Resolves one service at a time (older Android versions only allow one resolve in flight). */
     private suspend fun resolve(info: NsdServiceInfo): LanHost? = resLock.withLock {
         val res = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) resModern(info) else resLegacy(info)
         res?.let { r ->
@@ -77,6 +85,7 @@ class LanPvpNetwork(context: Context) {
         }
     }
 
+    /** First IPv4 address of a resolved service. */
     private fun ipv4Of(info: NsdServiceInfo): String? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             info.hostAddresses.firstOrNull { it is Inet4Address }?.hostAddress
@@ -86,6 +95,7 @@ class LanPvpNetwork(context: Context) {
         }
 
     @Suppress("DEPRECATION")
+    /** Resolve for Android 13 and below. */
     private suspend fun resLegacy(info: NsdServiceInfo): NsdServiceInfo? = suspendCancellableCoroutine { cont ->
         nsd.resolveService(info, object : NsdManager.ResolveListener {
             override fun onResolveFailed(info: NsdServiceInfo, code: Int) { if (cont.isActive) cont.resume(null) }
@@ -93,6 +103,7 @@ class LanPvpNetwork(context: Context) {
         })
     }
 
+    /** Resolve for Android 14+ using ServiceInfoCallback. */
     private suspend fun resModern(info: NsdServiceInfo): NsdServiceInfo? = suspendCancellableCoroutine { cont ->
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { cont.resume(null); return@suspendCancellableCoroutine }
         val cb = object : NsdManager.ServiceInfoCallback {
@@ -111,6 +122,7 @@ class LanPvpNetwork(context: Context) {
     }
 
     private companion object {
+        /** Prefix added to service names so we only list our own games. */
         const val SERVICE_PREFIX = "OnlySticks-"
         const val MAX_NAME = 40
         const val STAKE_KEY = "stake"

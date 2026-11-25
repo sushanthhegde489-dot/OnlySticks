@@ -1,3 +1,5 @@
+// Pack opening reveal: cards flip over one by one.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.shop
 
 import androidx.compose.animation.core.Animatable
@@ -40,6 +42,7 @@ import com.sushanth.onlysticks.ui.components.OutlinedTxt
 import com.sushanth.onlysticks.ui.theme.GameTheme
 import kotlinx.coroutines.delay
 
+/** Full-screen reveal of the cards from a pack or purchase. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PackShow(cardList: List<Card>, onDone: () -> Unit) {
@@ -64,6 +67,7 @@ fun PackShow(cardList: List<Card>, onDone: () -> Unit) {
     }
 }
 
+/** One card that flips face-up after a staggered delay, with a sound. */
 @Composable
 internal fun FlipCard(card: Card, index: Int) {
     val context = LocalContext.current
@@ -89,6 +93,7 @@ internal fun FlipCard(card: Card, index: Int) {
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun PackShowPrvw() {

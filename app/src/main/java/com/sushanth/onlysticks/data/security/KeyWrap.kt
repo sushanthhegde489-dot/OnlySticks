@@ -1,3 +1,5 @@
+// Encrypts small secrets with a hardware-backed Android Keystore key.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.security
 
 import android.security.keystore.KeyGenParameterSpec
@@ -8,11 +10,13 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+/** Encrypts/decrypts a small secret (the database passphrase). */
 interface KeyWrap {
     fun wrap(plain: ByteArray): ByteArray
     fun unwrap(wrapped: ByteArray): ByteArray
 }
 
+/** AES-256-GCM key wrap using Android Keystore. Output format: 12-byte IV followed by ciphertext+tag. */
 class KsKeyWrap(private val alias: String = ALIAS) : KeyWrap {
     override fun wrap(plain: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
@@ -27,6 +31,7 @@ class KsKeyWrap(private val alias: String = ALIAS) : KeyWrap {
         cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(TAG_BITS, wrapped, 0, IV_BYTES))
         return cipher.doFinal(wrapped, IV_BYTES, wrapped.size - IV_BYTES)
     }
+    /** Loads the AES key, generating it on first use. */
     private fun key(): SecretKey {
         val ks = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
         (ks.getEntry(alias, null) as? KeyStore.SecretKeyEntry)?.let { return it.secretKey }

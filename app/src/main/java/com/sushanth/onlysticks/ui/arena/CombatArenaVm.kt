@@ -1,3 +1,5 @@
+// ViewModel that runs a duel against a bot (PvE).
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena
 
 import android.util.Log
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+/** UI state for one round of a match: the combat snapshot plus what the player has selected so far. */
 data class MatchUi(
     val combat: CombatState,
     val legalMoves: Set<Move>,
@@ -43,18 +46,23 @@ data class MatchUi(
     val oppReady: Boolean = false,
     val waitForOpp: Boolean = false,
 ) {
+    /** The winner once the match is over. */
     val winner: PlrId? get() = combat.winner
     val isOver: Boolean get() = combat.isOver
+    /** The submit button is enabled once a move or power-up is picked and we're not waiting on the opponent. */
     val canSbmt: Boolean get() = (selMove != null || selPwrUpSlot != null) && !waitForOpp
 
+    /** Builds the [TurnAction] to submit from the current selection, or null if nothing is picked. */
     fun action(): TurnAction? = when {
         selPwrUpSlot != null -> TurnAction(null, selSwtchSlot, selPwrUpSlot, selPwrUpTarget)
         selMove != null -> TurnAction(selMove, selSwtchSlot)
         else -> null
     }
 
+    /** Picks a move (and cancels any selected power-up, since items use the whole turn). */
     fun withMove(move: Move): MatchUi = copy(selMove = move, selPwrUpSlot = null, selPwrUpTarget = null)
 
+    /** Picks or clears a power-up, preselecting its default target and clearing the move. */
     fun withPwrUp(slot: Int?): MatchUi {
         val type = slot?.let { combat.p1.pwrUpAt(it) }
         return copy(
@@ -65,6 +73,7 @@ data class MatchUi(
     }
 
     companion object {
+        /** Fresh selection state for a new round. */
         fun forRound(combat: CombatState): MatchUi {
             val plr = combat.p1
             return MatchUi(
@@ -77,8 +86,10 @@ data class MatchUi(
     }
 }
 
+/** Events from the last resolved round, for the stage animation. [seq] increases so the same events replay only once. */
 data class RoundPb(val seq: Int, val evts: List<CombatEvt>)
 
+/** Full arena screen state: chosen bot tier, current match, battle log and notices. */
 data class ArenaUiState(
     val botTier: Int = 1,
     val match: MatchUi? = null,
@@ -89,6 +100,11 @@ data class ArenaUiState(
     val canRematch: Boolean = true,
 )
 
+/**
+ * Runs bot matches locally. The match seed comes from two random nonces; the bot's next action is picked
+ * at the start of each round and revealed after its random "thinking" delay passes on the turn timer.
+ * All constructor parameters have defaults and exist so tests can inject fixed values.
+ */
 class CombatArenaVm(
     private val nonceSrc: () -> ByteArray = { SharedEntropy.newNonce() },
     private val turnDurMs: Long = Cfg.TURN_TIMER_MS,
@@ -105,11 +121,13 @@ class CombatArenaVm(
     private var botDelayMs: Long = 0
     private var equippedTrnrId: String? = null
     private var matchId: String = ""
+    /** Changes the bot difficulty (not allowed mid-match). */
     fun selectTier(tier: Int) {
         if (tier !in 1..Cfg.Bots.TIERS || _state.value.match?.isOver == false) return
         _state.update { it.copy(botTier = tier, opp = OppLbl.Bot(tier)) }
     }
 
+    /** Starts a match against a bot of the selected tier using [plrDeck]. Returns false if a match is already running. */
     fun startMatch(plrDeck: Deck): Boolean {
         if (activeMatch() != null) return false
         val tier = _state.value.botTier
@@ -130,10 +148,12 @@ class CombatArenaVm(
         matchSink.onMatchStarted(matchId, tier, equippedTrnrId)
         return true
     }
+    /** Clears a finished match to go back to the lobby. */
     override fun leaveMatch() {
         if (_state.value.match?.isOver != true) return
         _state.update { it.copy(match = null, log = emptyList(), notice = null, lastRound = null) }
     }
+    /** Selects a move; shows a notice if it's not allowed right now. */
     override fun selectMove(move: Move): Boolean {
         val match = activeMatch() ?: return false
         if (move !in match.legalMoves) {
@@ -143,6 +163,7 @@ class CombatArenaVm(
         updateMatch(match.withMove(move), clearNotice = true)
         return true
     }
+    /** Selects a stick to switch to before acting (null cancels the switch). */
     override fun selectSwtch(slot: Int?): Boolean {
         val match = activeMatch() ?: return false
         if (slot != null && slot !in match.switchableSlots) {
@@ -152,6 +173,7 @@ class CombatArenaVm(
         updateMatch(match.copy(selSwtchSlot = slot), clearNotice = true)
         return true
     }
+    /** Selects a power-up to use this turn (null cancels). */
     override fun selectPwrUp(slot: Int?): Boolean {
         val match = activeMatch() ?: return false
         if (slot != null && slot !in match.pwrUpSlots) {
@@ -161,11 +183,13 @@ class CombatArenaVm(
         updateMatch(match.withPwrUp(slot), clearNotice = true)
         return true
     }
+    /** Chooses who the selected power-up targets. */
     override fun selectPwrUpTarget(target: PwrUpTarget): Boolean {
         val match = activeMatch()?.takeIf { it.selPwrUpSlot != null } ?: return false
         updateMatch(match.copy(selPwrUpTarget = target), clearNotice = true)
         return true
     }
+    /** Submits the player's action and resolves the round. */
     override fun sbmt(): Boolean {
         val match = activeMatch() ?: return false
         val action = match.action()
@@ -176,7 +200,9 @@ class CombatArenaVm(
         resolve(match, action, _tmr.value.sbmt())
         return true
     }
+    /** Convenience: select and submit in one call. */
     fun sbmtMove(move: Move): Boolean = selectMove(move) && sbmt()
+    /** Advances the turn timer. Auto-skips the player's turn if time runs out; shows "opponent ready" after the bot's delay. */
     override fun onTmrTick(elapsedMs: Long) {
         val match = activeMatch() ?: return
         val (next, evt) = _tmr.value.tick(elapsedMs)
@@ -198,10 +224,15 @@ class CombatArenaVm(
         _tmr.value = _tmr.value.resume()
     }
 
+    /** The current match if it is still being played. */
     private fun activeMatch(): MatchUi? = _state.value.match?.takeUnless { it.isOver }
     private fun updateMatch(match: MatchUi, clearNotice: Boolean = false) {
         _state.update { it.copy(match = match, notice = if (clearNotice) null else it.notice) }
     }
+    /**
+     * Resolves a round with the engine, reports used power-ups, updates the log and replay events, then
+     * either prepares the next round (choosing the bot's next action) or reports the result.
+     */
     private fun resolve(match: MatchUi, plrAction: TurnAction, finishedTmr: TurnTmr) {
         val result = CombatEngine.resRound(
             match.combat, plrAction, checkNotNull(botAction), checkNotNull(combatRng),
@@ -241,6 +272,7 @@ class CombatArenaVm(
             matchSink.onMatchEnded(MatchOutcome(matchId, won = result.state.winner == PlrId.P1))
         }
     }
+    /** Picks the bot's action for the first round. */
     private fun beginRound(combat: CombatState): MatchUi {
         val rng = checkNotNull(botRng)
         botAction = BotBrain.chooseAction(combat.p2, combat.p1, _state.value.botTier, rng)
@@ -248,7 +280,9 @@ class CombatArenaVm(
         return MatchUi.forRound(combat)
     }
     companion object {
+        /** Domain tag so the bot's deck RNG is independent of the combat RNG. */
         private val BOT_DECK_DOMAIN = "stick-deck-duel/bot-deck".encodeToByteArray()
+        /** Generates the bot deck for [tier] from the match seed. */
         fun defBotDeck(tier: Int, seed: ByteArray): List<Card> =
             BotDeckGenerator.gen(tier, DeterministicRng.fromBytes(Hash.sha256(seed, BOT_DECK_DOMAIN)))
     }

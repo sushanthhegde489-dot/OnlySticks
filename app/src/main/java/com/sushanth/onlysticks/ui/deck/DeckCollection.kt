@@ -1,3 +1,5 @@
+// Filter chips for the deck builder collection.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.deck
 
 import androidx.compose.foundation.background
@@ -27,6 +29,7 @@ import com.sushanth.onlysticks.domain.model.Stick
 import com.sushanth.onlysticks.ui.components.OutlinedTxt
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Horizontally scrolling row of filter chips. */
 @Composable
 internal fun FiltChipsRow(
     selected: DeckCardFilt,
@@ -73,6 +76,7 @@ internal fun FiltChipsRow(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun FiltChipsRowPrvw() {

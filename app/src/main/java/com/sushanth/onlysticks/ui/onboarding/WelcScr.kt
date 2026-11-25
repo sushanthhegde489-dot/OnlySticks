@@ -1,3 +1,5 @@
+// Welcome screen shown before sign-in.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.onboarding
 
 import androidx.activity.compose.LocalActivity
@@ -36,6 +38,7 @@ import com.sushanth.onlysticks.ui.components.ParchmentPanel
 import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Welcome screen wired to [AcctVm] (sign in with Google, or continue offline in debug builds). */
 @Composable
 fun WelcScr(viewModel: AcctVm, modifier: Modifier = Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -50,6 +53,7 @@ fun WelcScr(viewModel: AcctVm, modifier: Modifier = Modifier) {
     )
 }
 
+/** Stateless welcome screen layout. */
 @Composable
 fun WelcScrContent(
     state: com.sushanth.onlysticks.ui.account.AcctUiState,
@@ -99,6 +103,7 @@ fun WelcScrContent(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun WelcScrPrvw() {

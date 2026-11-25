@@ -1,3 +1,5 @@
+// Short swipeable tutorial explaining how to play.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.onboarding
 
 import androidx.annotation.StringRes
@@ -36,8 +38,10 @@ import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.theme.GameTheme
 import kotlinx.coroutines.launch
 
+/** One tutorial page. */
 private data class TutPage(val icon: ImageVector, @StringRes val title: Int, @StringRes val body: Int)
 
+/** Tutorial pages in order. */
 private val pages = listOf(
     TutPage(GameIcos.Cards, R.string.tut_deck_title, R.string.tut_deck_body),
     TutPage(GameIcos.Battle, R.string.tut_rounds_title, R.string.tut_rounds_body),
@@ -47,6 +51,7 @@ private val pages = listOf(
     TutPage(GameIcos.Trnr, R.string.tut_friends_title, R.string.tut_friends_body),
 )
 
+/** Pager of tutorial pages with a button to continue / finish. */
 @Composable
 fun TutScr(onDone: () -> Unit, modifier: Modifier = Modifier) {
     val pager = rememberPagerState { pages.size }
@@ -90,6 +95,7 @@ fun TutScr(onDone: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun TutScrPrvw() {

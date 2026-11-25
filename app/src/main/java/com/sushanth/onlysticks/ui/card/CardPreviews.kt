@@ -1,3 +1,5 @@
+// Sample cards used only by Android Studio previews.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.card
 
 import android.content.res.Configuration
@@ -23,6 +25,7 @@ import com.sushanth.onlysticks.domain.model.TrnrBuff
 import com.sushanth.onlysticks.domain.model.TuningFlag
 import com.sushanth.onlysticks.ui.theme.OnlySticksTheme
 
+/** Sample stick factory for previews. */
 internal object PrvwCards {
     fun stick(rarity: Rarity): Stick {
         val mid = { r: IntRange -> (r.first + r.last) / 2 }
@@ -37,10 +40,12 @@ internal object PrvwCards {
     val trainer = Trnr("preview-trainer", TrnrBuff.MAX_HP, affinity = 320)
 }
 
+/** Feeds every rarity into a preview so all card frames can be compared side by side. */
 internal class RarProv : PreviewParameterProvider<Rarity> {
     override val values = Rarity.entries.asSequence()
 }
 
+/** Android Studio preview of a stick card in each rarity. */
 @Preview(name = "Light", widthDp = 260)
 @Preview(name = "Dark", widthDp = 260, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "Font 200%", widthDp = 260, fontScale = 2f)
@@ -58,6 +63,7 @@ internal fun PokemonCardRarPrvw(@PreviewParameter(RarProv::class) rarity: Rarity
     }
 }
 
+/** Android Studio preview of a power-up card. */
 @Preview(name = "Power-up", widthDp = 260)
 @Preview(name = "Trainer dark", widthDp = 260, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable

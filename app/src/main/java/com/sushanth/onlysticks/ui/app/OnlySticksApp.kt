@@ -1,3 +1,5 @@
+// Root composable and top-level navigation (welcome, onboarding, tutorial, then the main game shell).
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.app
 
 import androidx.compose.animation.AnimatedContent
@@ -84,8 +86,13 @@ import com.sushanth.onlysticks.ui.theme.OnlySticksTheme
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 
+/** Tabs in the bottom tray. */
 enum class AppTab { DECK, BATTLE, SHOP }
 
+/**
+ * Root of the UI. Chooses which flow to show from the account state:
+ * not signed in -> welcome, no name -> onboarding, tutorial not done -> tutorial, otherwise the game.
+ */
 @Composable
 fun OnlySticksApp(cont: AppCont) {
     if (LocalInspectionMode.current) {
@@ -144,6 +151,10 @@ fun OnlySticksApp(cont: AppCont) {
     }
 }
 
+/**
+ * Main game: top bar, bottom tabs (deck / battle / shop), duel screens, admin tools, account sheet
+ * and the daily bonus dialog. Creates the screen ViewModels.
+ */
 @Composable
 private fun GameShell(cont: AppCont, account: AcctState, acctVm: AcctVm, onTut: () -> Unit) {
     val plrName = account.displayName.orEmpty()
@@ -241,8 +252,10 @@ private fun GameShell(cont: AppCont, account: AcctState, acctVm: AcctVm, onTut: 
     }
 }
 
+/** What fills the screen: the menus, a bot duel or a PvP duel. */
 private enum class Mode { MENU, BOT_DUEL, PVP_DUEL }
 
+/** Top bar showing the player's name (tap for the account sheet) and coin balance. */
 @Composable
 private fun TopBar(name: String, bal: Long, onProf: () -> Unit, modifier: Modifier = Modifier) {
     val coins = remember(bal) { NumberFormat.getIntegerInstance().format(bal) }
@@ -273,6 +286,7 @@ private fun TopBar(name: String, bal: Long, onProf: () -> Unit, modifier: Modifi
     }
 }
 
+/** Bottom navigation tray. */
 @Composable
 private fun BottomTray(selected: AppTab, onSelect: (AppTab) -> Unit) {
     Box(Modifier.fillMaxWidth()) {
@@ -292,6 +306,7 @@ private fun BottomTray(selected: AppTab, onSelect: (AppTab) -> Unit) {
     }
 }
 
+/** One tray button; the selected one lifts up and grows with a bouncy animation. */
 @Composable
 private fun TrayItem(
     tab: AppTab,
@@ -340,6 +355,7 @@ private fun TrayItem(
     }
 }
 
+/** Android Studio preview. */
 @Preview(showBackground = true)
 @Composable
 private fun OnlySticksAppPrvw() {
@@ -348,6 +364,7 @@ private fun OnlySticksAppPrvw() {
     }
 }
 
+/** Android Studio preview (onboarding). */
 @Preview(showBackground = true)
 @Composable
 private fun OnlySticksAppOnbrdPrvw() {
@@ -358,6 +375,7 @@ private fun OnlySticksAppOnbrdPrvw() {
     }
 }
 
+/** Android Studio preview (tutorial). */
 @Preview(showBackground = true)
 @Composable
 private fun OnlySticksAppTutPrvw() {
@@ -368,6 +386,7 @@ private fun OnlySticksAppTutPrvw() {
     }
 }
 
+/** Android Studio preview. */
 @Preview(showBackground = true)
 @Composable
 private fun TopBarPrvw() {
@@ -376,6 +395,7 @@ private fun TopBarPrvw() {
     }
 }
 
+/** Android Studio preview. */
 @Preview(showBackground = true)
 @Composable
 private fun BottomTrayPrvw() {

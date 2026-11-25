@@ -1,18 +1,26 @@
+// Coin ledger model. The balance is never stored directly; it is the sum of all ledger entries.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.economy
 
 import com.sushanth.onlysticks.domain.config.Cfg
 import java.time.LocalDate
 
+/** Why coins were added to or removed from the player's balance. */
 enum class LdgrReason { DAILY_LOGIN, PVE_WIN, PVE_LOSS, STEPS, ANTE_STAKE, ANTE_PAYOUT, PACK_PURCHASE, CARD_PURCHASE, ADMIN_GRANT, STARTER_BONUS }
 
+/** One coin transaction. Positive [amount] = earned, negative = spent. [claimDate] is set for daily claims. */
 data class LdgrEntry(val amount: Long, val reason: LdgrReason, val timestampMs: Long, val claimDate: LocalDate? = null)
 
+/** Factory functions for every kind of ledger entry, so amounts are calculated in one place. */
 object CoinsRules {
+    /** Current balance = sum of every entry. */
     fun bal(entries: List<LdgrEntry>): Long = entries.sumOf { it.amount }
 
+    /** One-off coins granted when a new profile is created. */
     fun startBonus(nowMs: Long, amount: Long = Cfg.Economy.STARTING_CURRENCY): LdgrEntry =
         LdgrEntry(amount, LdgrReason.STARTER_BONUS, nowMs)
 
+    /** Daily login reward, or null if today's reward was already claimed (see [ClaimGuard]). */
     fun dlyLogin(
         lastClaimDate: LocalDate?,
         lastClaimEpochMs: Long?,
@@ -24,23 +32,28 @@ object CoinsRules {
         return LdgrEntry(amount.toLong(), LdgrReason.DAILY_LOGIN, nowMs, today)
     }
 
+    /** Coins for finishing a bot match: PVE_WIN_PER_TIER x tier for a win, a small consolation for a loss. */
     fun pveRes(won: Boolean, botTier: Int, nowMs: Long): LdgrEntry =
         if (won) LdgrEntry(Cfg.Economy.PVE_WIN_PER_TIER.toLong() * botTier, LdgrReason.PVE_WIN, nowMs)
         else LdgrEntry(5L, LdgrReason.PVE_LOSS, nowMs)
 
+    /** Coins each side puts into the pot for a bot match of the given tier. */
     fun pveAnte(botTier: Int): Long = 10L * botTier
 
+    /** Total pot paid to the winner. */
     fun pvePot(botTier: Int): Long = 2 * pveAnte(botTier)
 
     fun anteBet(botTier: Int, nowMs: Long): LdgrEntry = LdgrEntry(-pveAnte(botTier), LdgrReason.ANTE_STAKE, nowMs)
 
     fun antePayout(botTier: Int, nowMs: Long): LdgrEntry = LdgrEntry(pvePot(botTier), LdgrReason.ANTE_PAYOUT, nowMs)
 
+    /** A purchase (pack or card). [price] must be positive; it is stored as a negative amount. */
     fun buy(reason: LdgrReason, price: Long, nowMs: Long): LdgrEntry {
         require(price > 0) { "price must be positive" }
         return LdgrEntry(-price, reason, nowMs)
     }
 
+    /** Converts an accepted step claim into a coin entry. */
     fun stps(accepted: StpClaimRes.Accepted, nowMs: Long): LdgrEntry =
         LdgrEntry(accepted.coins.toLong(), LdgrReason.STEPS, nowMs, accepted.claimDate)
 }

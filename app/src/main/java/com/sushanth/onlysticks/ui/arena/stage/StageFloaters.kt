@@ -1,3 +1,5 @@
+// Floating damage numbers and speech bubbles that rise over the stage.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena.stage
 
 import androidx.compose.foundation.background
@@ -29,6 +31,7 @@ import com.sushanth.onlysticks.ui.theme.DispFont
 import com.sushanth.onlysticks.ui.theme.GameCols
 import kotlin.math.roundToInt
 
+/** Draws one floating text that rises and fades according to its own progress animation. */
 @Composable
 internal fun FltOverlay(
     flt: StageFlt,
@@ -106,6 +109,7 @@ internal fun FltOverlay(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun FltOverlayPrvw() {

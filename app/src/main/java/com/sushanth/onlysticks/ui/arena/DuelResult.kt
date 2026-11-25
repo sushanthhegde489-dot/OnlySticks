@@ -1,3 +1,5 @@
+// Victory / defeat overlay shown at the end of a duel.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena
 
 import androidx.compose.foundation.background
@@ -37,6 +39,7 @@ import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.components.woodBoard
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** End-of-match overlay with the result, round count and buttons to rematch (if allowed) or leave. */
 @Composable
 internal fun ResOverlay(won: Boolean, botName: String, rounds: Int, onPlayAgain: (() -> Unit)?, onLeave: () -> Unit) {
     val c = GameTheme.colors
@@ -102,6 +105,7 @@ internal fun ResOverlay(won: Boolean, botName: String, rounds: Int, onPlayAgain:
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun ResOverlayPrvw() {

@@ -1,3 +1,5 @@
+// Converters between database rows and domain models.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.repository
 
 import com.sushanth.onlysticks.data.local.entity.CardEntity
@@ -13,7 +15,9 @@ import com.sushanth.onlysticks.domain.stats.effectiveStats
 import com.sushanth.onlysticks.domain.trainer.TrainerProgression
 import com.sushanth.onlysticks.domain.trainer.TrnrRecord
 
+/** Converts cards to and from [CardEntity]. */
 object CardMapper {
+    /** Domain card to row. The signature is left empty; [CardRepository] signs it before saving. */
     fun toEntity(card: Card, createdAt: Long): CardEntity = when (card) {
         is Stick -> CardEntity(
             id = card.id,
@@ -40,6 +44,7 @@ object CardMapper {
         )
         is Trnr -> throw IllegalArgumentException("Trainers are stored in the trainers table")
     }
+    /** Row to domain card, or null if required columns are missing. */
     fun toDomain(entity: CardEntity): Card? = when (entity.kind) {
         CardKind.STICK -> entity.rarity?.let { rarity ->
             Stick(
@@ -57,6 +62,7 @@ object CardMapper {
         CardKind.POWER_UP -> entity.powerUpType?.let { PwrUp(entity.id, it, entity.customName) }
     }
 }
+/** Converts trainers to and from [TrnrEntity]. */
 object TrnrMapper {
     fun toDomain(entity: TrnrEntity): Trnr =
         Trnr(id = entity.id, buff = entity.buff, affinity = entity.affinity, customName = entity.customName)
@@ -70,6 +76,7 @@ object TrnrMapper {
         customName = trainer.customName,
         createdAt = createdAt,
     )
+    /** Copies progression (affinity, rank, wins, name) from [record] onto an existing row. */
     fun update(entity: TrnrEntity, record: TrnrRecord): TrnrEntity = entity.copy(
         affinity = record.trainer.affinity,
         rank = TrainerProgression.rankFor(record.trainer.affinity),

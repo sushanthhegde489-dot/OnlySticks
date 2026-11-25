@@ -1,3 +1,7 @@
+// PvP session protocol on top of a [LineChan].
+// Uses commit-reveal for every secret exchange (nonces, loadouts, turn actions) so neither player can
+// wait to see the other's choice before making their own.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.pvp
 
 import com.sushanth.onlysticks.domain.combat.PlrId
@@ -17,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.security.SecureRandom
 
+/** One PvP connection. [seat] is P1 for the host and P2 for the guest. */
 class PvpSess(
     private val chan: LineChan,
     val seat: PlrId,
@@ -24,10 +29,16 @@ class PvpSess(
     private val timeoutMs: Long = Cfg.Pvp.ROUND_TIMEOUT_MS,
     private val random: SecureRandom = SecureRandom(),
 ) {
+    /** Messages read in the background, waiting to be consumed by [expect]. */
     private val inbox = Channel<Result<List<String>>>(INBOX_SIZE)
     private val _peerCommittedRound = MutableStateFlow(0)
+    /** Latest round the opponent has committed an action for (lets the UI show "opponent is ready"). */
     val peerCommittedRound: StateFlow<Int> = _peerCommittedRound.asStateFlow()
 
+    /**
+     * Background reader: splits incoming lines into words, tracks round commits, and closes the
+     * session if the peer sends faster than we consume (flooding).
+     */
     private val reader = scope.launch {
         while (true) {
             val line = runCatching { chan.receive() }
@@ -42,6 +53,7 @@ class PvpSess(
         }
     }
 
+    /** Handshake: exchange protocol version and display names. Returns the opponent's name. */
     suspend fun shake(myName: String): String {
         chan.send("$HELLO $VERSION ${PvpCodec.encodeTxt(myName)}")
         val reply = expect(HELLO, 3)
@@ -49,12 +61,14 @@ class PvpSess(
         return PvpCodec.decodeTxt(reply[2])
     }
 
+    /** Exchanges random nonces used to build the shared match seed. */
     suspend fun exchangeNonce(myNonce: ByteArray): ByteArray {
         val theirs = commitShow("nonce", myNonce)
         if (theirs.size != SharedEntropy.NONCE_SIZE) throw ProtocolException("bad nonce")
         return theirs
     }
 
+    /** Exchanges deck, trainer and stake. Returns the opponent's (not yet validated) loadout. */
     suspend fun exchangeLoadout(mine: Loadout): Loadout {
         val text = listOf(PvpCodec.encodeCards(mine.deck), PvpCodec.encodeCards(listOfNotNull(mine.trainer)), PvpCodec.encodeCards(mine.bet))
             .joinToString("|")
@@ -68,6 +82,7 @@ class PvpSess(
         )
     }
 
+    /** Exchanges this round's actions. */
     suspend fun exchangeAction(round: Int, action: TurnAction): TurnAction =
         PvpCodec.decodeAction(commitShow("$ROUND_PREFIX$round", PvpCodec.encodeAction(action).encodeToByteArray()).decodeToString())
 
@@ -76,6 +91,7 @@ class PvpSess(
         chan.close()
     }
 
+    /** Commit-reveal: send a salted hash, wait for theirs, then reveal value+salt and verify their reveal. */
     private suspend fun commitShow(tag: String, value: ByteArray): ByteArray {
         val salt = ByteArray(SALT_SIZE).also(random::nextBytes)
         chan.send("$COMMIT $tag ${Hash.commit(value, salt).toHex()}")
@@ -88,6 +104,7 @@ class PvpSess(
         return theirVal
     }
 
+    /** Waits for the next message and checks its type, word count and tag. Throws on timeout, BYE or mismatch. */
     private suspend fun expect(kind: String, size: Int, tag: String? = null): List<String> {
         val parts = withTimeout(timeoutMs) { inbox.receive() }.getOrElse { throw it as? ProtocolException ?: ChanClosedException() }
         if (parts[0] == BYE) throw ChanClosedException()
@@ -95,6 +112,7 @@ class PvpSess(
         return parts
     }
 
+    /** Parses the round number from tags like "r12". */
     private fun roundOf(tag: String?): Int? = tag?.removePrefix(ROUND_PREFIX)?.takeIf { tag.startsWith(ROUND_PREFIX) }?.toIntOrNull()
 
     private companion object {

@@ -1,3 +1,5 @@
+// Rock-paper-scissors style table describing what happens when any two moves meet.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.combat
 
 import com.sushanth.onlysticks.domain.model.Move
@@ -8,8 +10,10 @@ import com.sushanth.onlysticks.domain.model.Move.PARRY as P
 import com.sushanth.onlysticks.domain.model.Move.REST as R
 import com.sushanth.onlysticks.domain.model.Move.SLASH as S
 
+/** What happens to one side (row or column player) when two moves collide. */
 sealed interface SideOutcome {
     data object Hit : SideOutcome
+    /** This side's attack was parried; it takes [counterFrac] of its own damage back. */
     data class Blocked(val counterFrac: Double) : SideOutcome
     data object ParrySuccess : SideOutcome
     data object ParryClink : SideOutcome
@@ -17,10 +21,13 @@ sealed interface SideOutcome {
     data object Rest : SideOutcome
 }
 
+/** Who strikes first when both sides land a hit: by speed (INITIATIVE) or forced row/column first. */
 enum class Order { INITIATIVE, ROW_FIRST, COL_FIRST }
 
+/** Outcome for the row player (P1), the column player (P2), and hit order. */
 data class Cell(val row: SideOutcome, val col: SideOutcome, val order: Order = Order.INITIATIVE)
 
+/** Lookup table of every (P1 move, P2 move) pair. Lunges beat jabs/slashes on order; parries block attacks. */
 object InteractionMatrix {
     private val hit = SideOutcome.Hit
     private val rest = SideOutcome.Rest
@@ -69,5 +76,6 @@ object InteractionMatrix {
         (X to R) to Cell(hit, rest),
         (X to X) to Cell(hit, hit),
     )
+    /** Returns the cell for P1 playing [row] and P2 playing [col]. */
     fun cell(row: Move, col: Move): Cell = table.getValue(row to col)
 }

@@ -1,3 +1,5 @@
+// Daily login bonus popup.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.bonus
 
 import androidx.compose.foundation.background
@@ -30,6 +32,7 @@ import com.sushanth.onlysticks.ui.components.OutlinedTxt
 import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Dialog showing today's streak day and coin reward, with a claim button. */
 @Composable
 fun DlyBonusDlg(offer: DailyBonusOffer, onClaim: () -> Unit) {
     val c = GameTheme.colors
@@ -69,6 +72,7 @@ fun DlyBonusDlg(offer: DailyBonusOffer, onClaim: () -> Unit) {
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun DlyBonusDlgPrvw() {

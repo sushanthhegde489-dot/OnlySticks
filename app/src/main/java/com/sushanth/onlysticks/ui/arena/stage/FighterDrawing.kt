@@ -1,3 +1,5 @@
+// Canvas drawing code for a stick-figure fighter and its effects.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena.stage
 
 import androidx.compose.foundation.layout.size
@@ -21,6 +23,10 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * Draws one stick fighter at [baseXFrac] of the stage width, facing left (-1) or right (+1).
+ * Pose comes from [anim] (lunge, knockback, block, fall...), plus idle bob, low-stamina droop and fire/wet effects.
+ */
 internal fun DrawScope.drawFgtr(
     combatant: Combatant?,
     baseXFrac: Float,
@@ -36,12 +42,14 @@ internal fun DrawScope.drawFgtr(
     val h = size.height
     val groundY = h * 0.80f
 
+    // Fighters with low stamina breathe slower and slump forward.
     val lowStam = combatant != null && combatant.stam < 20
     val phase = if (lowStam) idlePhase * 0.5f else idlePhase
     val bobPx = sin(phase) * 2.dp.toPx()
     val crouchPx = anim.crouch.value * 10.dp.toPx()
     val droopPx = if (lowStam) 5.dp.toPx() else 0f
 
+    // Knockback pushes the fighter away from the opponent with a little jitter.
     val kb = anim.knockbackDp.value
     val hitJitterPx = if (kb > 0f) sin(kb * 2.2f) * 3.dp.toPx() * (kb / 10f) else 0f
     val centerX = w * (baseXFrac + facing * anim.lungeX.value) - facing * kb.dp.toPx() + hitJitterPx
@@ -63,6 +71,7 @@ internal fun DrawScope.drawFgtr(
     val headRad = minOf(w, h) * 0.055f
     val headCenter = Offset(shoulderX, shoulderY - headRad * 1.15f)
 
+    // A KO'd fighter lies flat even before the fall animation runs.
     val fallAngle = if (combatant?.alive == false && anim.fallDeg.value == 0f) 90f else anim.fallDeg.value
 
     withTransform({
@@ -332,11 +341,13 @@ internal fun DrawScope.drawFgtr(
     }
 }
 
+/** |sin(rad)|, used for bouncing motions. */
 internal fun absSin(rad: Float): Float {
     val s = sin(rad)
     return if (s < 0f) -s else s
 }
 
+/** Draws a radial spark burst used for clashes and crits. [progress] runs 0 to 1. */
 internal fun DrawScope.drawSparkBurst(
     center: Offset,
     progress: Float,

@@ -1,8 +1,11 @@
+// Vector icons for navigation tabs and trainers.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/** Cards / deck tab icon. */
 internal fun buildCards(): ImageVector = icoBldr("Cards").apply {
         chunkyPath(fillCol = Color(0xFFFFF3D6)) {
             moveTo(4.5f, 9f)
@@ -38,6 +41,7 @@ internal fun buildCards(): ImageVector = icoBldr("Cards").apply {
         }
 }.build()
 
+/** Battle tab icon. */
 internal fun buildBattle(): ImageVector = icoBldr("Battle").apply {
         chunkyPath(fillCol = Color(0xFFA86B38)) {
             moveTo(4.5f, 7f)
@@ -82,6 +86,7 @@ internal fun buildBattle(): ImageVector = icoBldr("Battle").apply {
         }
 }.build()
 
+/** Shop tab icon. */
 internal fun buildShop(): ImageVector = icoBldr("Shop").apply {
         chunkyPath(fillCol = Color(0xFFE5533D)) {
             moveTo(3.5f, 5.5f)
@@ -121,6 +126,7 @@ internal fun buildShop(): ImageVector = icoBldr("Shop").apply {
         }
 }.build()
 
+/** Trainer icon. */
 internal fun buildTrnr(): ImageVector = icoBldr("Trainer").apply {
         chunkyPath(fillCol = Color(0xFFD32F2F)) {
             moveTo(6f, 13f)

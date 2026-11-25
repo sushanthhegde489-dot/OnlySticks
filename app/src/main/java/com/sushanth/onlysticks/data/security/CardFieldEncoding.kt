@@ -1,11 +1,18 @@
+// Canonical byte encoding of a card row, used as the input to its signature.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.security
 
 import com.sushanth.onlysticks.data.local.entity.CardEntity
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 
+/**
+ * Serialises every signed column of a [CardEntity] in a fixed order. Changing this breaks all existing signatures,
+ * so bump VERSION if the layout ever changes.
+ */
 object CardFieldEncoding {
     private const val VERSION = 1
+    /** Encodes the card's fields (everything except signature and quarantine flag). */
     fun encode(card: CardEntity): ByteArray {
         val bytes = ByteArrayOutputStream()
         DataOutputStream(bytes).use { out ->
@@ -26,6 +33,7 @@ object CardFieldEncoding {
         }
         return bytes.toByteArray()
     }
+    /** Writes a length-prefixed UTF-8 string, or -1 for null. */
     private fun DataOutputStream.string(value: String?) {
         if (value == null) {
             writeInt(-1)

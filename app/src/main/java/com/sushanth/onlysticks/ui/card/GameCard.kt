@@ -1,3 +1,5 @@
+// The small card tile used in lists and decks, plus helpers for card colours, icons and titles.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.card
 
 import androidx.compose.animation.core.animateDpAsState
@@ -72,19 +74,23 @@ import com.sushanth.onlysticks.ui.theme.ItemFrameCols
 import com.sushanth.onlysticks.ui.theme.rarFrameCols
 import kotlin.math.roundToInt
 
+/** Main frame colour for a card. */
 fun Card.frameCol(): Color = frameCols().frame
 
+/** Frame colour set: by rarity for sticks, a shared item palette otherwise. */
 fun Card.frameCols(): FrameCols = when (this) {
     is Stick -> rarFrameCols(rarity)
     else -> ItemFrameCols
 }
 
+/** Icon representing a card. */
 fun Card.icon(): ImageVector = when (this) {
     is Stick -> GameIcos.Atk
     is PwrUp -> if (type == PwrUpType.LIGHTER) GameIcos.Flame else GameIcos.Drop
     is Trnr -> GameIcos.Trnr
 }
 
+/** Display title: nickname if set, otherwise a default name. */
 @Composable
 fun Card.title(): String = when (this) {
     is Stick -> displayName
@@ -92,6 +98,7 @@ fun Card.title(): String = when (this) {
     is Trnr -> customName ?: stringResource(buff.lblRes())
 }
 
+/** Short code shown in the corner (rarity code, or an item/trainer code). */
 @Composable
 fun Card.code(): String = when (this) {
     is Stick -> rarity.code
@@ -99,7 +106,9 @@ fun Card.code(): String = when (this) {
     is Trnr -> stringResource(R.string.card_code_trnr)
 }
 
+/** Shared card sizes. */
 object GameCardDefaults {
+    /** Width / height ratio of every card. */
     const val ASPECT = 0.72f
     val FullCardW = 260.dp
     val FullDetailMin = 200.dp
@@ -108,6 +117,10 @@ object GameCardDefaults {
     val InspectW = 300.dp
 }
 
+/**
+ * A card tile. Shows a compact view when small and the full card when large enough.
+ * Long-press (if [inspectable]) opens the full card in a dialog. [durability] draws a wear bar.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GameCard(
@@ -181,6 +194,7 @@ fun GameCard(
     }
 }
 
+/** Dashed placeholder for an empty deck slot. */
 @Composable
 private fun EmptySlot(shape: RoundedCornerShape) {
     val c = GameTheme.colors
@@ -193,6 +207,7 @@ private fun EmptySlot(shape: RoundedCornerShape) {
     }
 }
 
+/** Simplified card layout for small sizes. Text scales with the card width. */
 @Composable
 private fun CompactCard(card: Card, w: Dp, shape: RoundedCornerShape) {
     val c = GameTheme.colors
@@ -277,6 +292,7 @@ private fun CompactCard(card: Card, w: Dp, shape: RoundedCornerShape) {
     }
 }
 
+/** Full card scaled down to fit the tile. */
 @Composable
 private fun ScaledFullCard(card: Card) {
     Layout(
@@ -305,6 +321,7 @@ private fun ScaledFullCard(card: Card) {
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun GameCardPrvw() {

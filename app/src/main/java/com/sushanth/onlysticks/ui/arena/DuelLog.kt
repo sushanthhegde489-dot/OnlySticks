@@ -1,3 +1,5 @@
+// Battle log widgets: the ticker on the stage, notice chips and the full log sheet.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena
 
 import androidx.compose.foundation.background
@@ -33,6 +35,7 @@ import com.sushanth.onlysticks.R
 import com.sushanth.onlysticks.ui.common.asStr
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Single-line ticker showing the latest log line; tap to open the full log. */
 @Composable
 internal fun LogTicker(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = GameTheme.colors
@@ -52,6 +55,7 @@ internal fun LogTicker(text: String, onClick: () -> Unit, modifier: Modifier = M
     )
 }
 
+/** Small chip for short warnings (e.g. "pick a move first"). */
 @Composable
 internal fun NoticeChip(text: String) {
     val c = GameTheme.colors
@@ -67,6 +71,7 @@ internal fun NoticeChip(text: String) {
     )
 }
 
+/** Bottom sheet listing every log line of the match. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun BattleLogSheet(state: ArenaUiState, onDismiss: () -> Unit) {
@@ -86,6 +91,7 @@ internal fun BattleLogSheet(state: ArenaUiState, onDismiss: () -> Unit) {
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun DuelLogPrvw() {

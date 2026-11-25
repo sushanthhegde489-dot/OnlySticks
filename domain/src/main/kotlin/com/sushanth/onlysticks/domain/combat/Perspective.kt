@@ -1,13 +1,18 @@
+// Flips combat state/events so each device can always draw "me" as P1 (used in PvP as the guest).
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.combat
 
 object Perspective {
+    /** Returns [s] as seen by [me]: if I'm P2, players are swapped and the winner flipped. */
     fun state(s: CombatState, me: PlrId): CombatState =
         if (me == PlrId.P1) s
         else CombatState(p1 = s.p2.copy(id = PlrId.P1), p2 = s.p1.copy(id = PlrId.P2), round = s.round, winner = s.winner?.other)
 
+    /** Same flip as [state] but for a list of events. */
     fun evts(evts: List<CombatEvt>, me: PlrId): List<CombatEvt> =
         if (me == PlrId.P1) evts else evts.map(::flip)
 
+    /** Swaps every player reference inside a single event. */
     private fun flip(e: CombatEvt): CombatEvt = when (e) {
         is CombatEvt.Swtch -> e.copy(plr = e.plr.other)
         is CombatEvt.PwrUpUsed -> e.copy(plr = e.plr.other, target = e.target.other)

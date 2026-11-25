@@ -1,3 +1,5 @@
+// Room type converters for enums.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.local
 
 import androidx.room.TypeConverter
@@ -6,6 +8,7 @@ import com.sushanth.onlysticks.domain.model.PwrUpType
 import com.sushanth.onlysticks.domain.model.Rarity
 import com.sushanth.onlysticks.domain.model.TrnrBuff
 
+/** Stores enums as their names in the database. */
 class Converters {
     @TypeConverter
     fun fromRar(value: Rarity?): String? = value?.name

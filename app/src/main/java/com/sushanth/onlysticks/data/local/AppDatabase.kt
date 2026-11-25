@@ -1,3 +1,5 @@
+// Room database definition: all tables and their DAOs.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.data.local
 
 import androidx.room.Database
@@ -23,6 +25,10 @@ import com.sushanth.onlysticks.data.local.entity.SettEntity
 import com.sushanth.onlysticks.data.local.entity.StoreBuyEntity
 import com.sushanth.onlysticks.data.local.entity.TrnrEntity
 
+/**
+ * The app's Room database (encrypted with SQLCipher, see [DbFactory]). Bump [version] and add a migration
+ * in [Migrations] whenever an entity changes; schemas are exported to app/schemas.
+ */
 @Database(
     entities = [
         CardEntity::class,
@@ -51,6 +57,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun pvpEscrwDao(): PvpEscrwDao
     abstract fun settDao(): SettDao
 
+    /** Wipes the player's collection (used before restoring a backup). Profile and settings are kept. */
     suspend fun clearPlrColl() {
         deckDao().deleteAll()
         cardDao().deleteAll()
@@ -60,6 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
     }
 
     companion object {
+        /** Database file name (historical name from when the project was called StickDeck). */
         const val NAME = "stickdeck.db"
     }
 }

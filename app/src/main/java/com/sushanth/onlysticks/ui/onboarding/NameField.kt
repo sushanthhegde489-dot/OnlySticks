@@ -1,3 +1,5 @@
+// Display name entry form shared by onboarding and the account sheet.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.onboarding
 
 import androidx.annotation.StringRes
@@ -27,6 +29,7 @@ import com.sushanth.onlysticks.ui.theme.GameTheme
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 
+/** Error message for an invalid name, or null if it's valid. */
 @StringRes
 fun DispNameRes.errRes(): Int? = when (this) {
     is DispNameRes.Valid -> null
@@ -35,6 +38,7 @@ fun DispNameRes.errRes(): Int? = when (this) {
     DispNameRes.BadCharacters -> R.string.name_bad_chars
 }
 
+/** Name text field with a save button. Shows validation errors and calls [onSaved] after a successful save. */
 @Composable
 fun NameForm(
     initial: String,
@@ -81,6 +85,7 @@ fun NameForm(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun NameFormPrvw() {

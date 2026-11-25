@@ -1,8 +1,11 @@
+// Vector icons for stats.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/** Heart icon (HP). */
 internal fun buildHeart(): ImageVector = icoBldr("Heart").apply {
         chunkyPath(fillCol = Color(0xFFE5533D)) {
             moveTo(12f, 21.5f)
@@ -20,6 +23,7 @@ internal fun buildHeart(): ImageVector = icoBldr("Heart").apply {
         }
 }.build()
 
+/** Lightning bolt icon (stamina). */
 internal fun buildBolt(): ImageVector = icoBldr("Bolt").apply {
         chunkyPath(fillCol = Color(0xFF3AB6C9)) {
             moveTo(13.5f, 2.5f)
@@ -33,6 +37,7 @@ internal fun buildBolt(): ImageVector = icoBldr("Bolt").apply {
         }
 }.build()
 
+/** Shield icon (durability / defence). */
 internal fun buildShield(): ImageVector = icoBldr("Shield").apply {
         chunkyPath(fillCol = Color(0xFF7A4A24)) {
             moveTo(5f, 4.5f)
@@ -49,6 +54,7 @@ internal fun buildShield(): ImageVector = icoBldr("Shield").apply {
         }
 }.build()
 
+/** Speed icon. */
 internal fun buildSpd(): ImageVector = icoBldr("Speed").apply {
         chunkyPath(fillCol = Color(0xFF3AB6C9)) {
             moveTo(7f, 9f)
@@ -81,6 +87,7 @@ internal fun buildSpd(): ImageVector = icoBldr("Speed").apply {
         }
 }.build()
 
+/** Attack icon. */
 internal fun buildAtk(): ImageVector = icoBldr("Attack").apply {
         chunkyPath(fillCol = Color(0xFFA86B38)) {
             moveTo(4.5f, 18.5f)

@@ -1,3 +1,5 @@
+// The main duel screen: fighters, animated stage, timer, move dock and result overlay.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena
 
 import androidx.compose.animation.AnimatedVisibility
@@ -74,6 +76,7 @@ import com.sushanth.onlysticks.ui.timer.CntdwnTmrHud
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/** Connects a [DuelCtrl] (bot or PvP) to [DuelScr]. */
 @Composable
 fun DuelRoute(vm: DuelCtrl, onPlayAgain: (() -> Unit)?, modifier: Modifier = Modifier) {
     val st by vm.state.collectAsStateWithLifecycle()
@@ -94,6 +97,7 @@ fun DuelRoute(vm: DuelCtrl, onPlayAgain: (() -> Unit)?, modifier: Modifier = Mod
     )
 }
 
+/** Stateless duel screen. The timer pauses while the stage replays the last round and resumes afterwards. */
 @Composable
 fun DuelScr(
     state: ArenaUiState,
@@ -234,6 +238,7 @@ fun DuelScr(
     if (showLog) BattleLogSheet(state, onDismiss = { showLog = false })
 }
 
+/** Turn timer ring for the duel screen; wraps [CntdwnTmrHud] around the controller's timer flow. */
 @Composable
 private fun DuelTmr(
     tmr: StateFlow<TurnTmr>,
@@ -253,6 +258,7 @@ private fun DuelTmr(
     )
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun DuelScrPrvw() {
@@ -295,6 +301,7 @@ private fun DuelScrPrvw() {
     }
 }
 
+/** HP/stamina plate for one fighter, with active stick info and a "ready" indicator for the opponent. */
 @Composable
 internal fun FgtrPlate(name: String, badge: String?, c: Combatant, barCol: Color, ready: Boolean, mirrored: Boolean) {
     val colors = GameTheme.colors
@@ -345,6 +352,7 @@ internal fun FgtrPlate(name: String, badge: String?, c: Combatant, barCol: Color
     }
 }
 
+/** Row of move cards. */
 @Composable
 internal fun MoveDock(moves: List<DuelMove>, selected: Move?, onSelect: (Move) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -354,6 +362,7 @@ internal fun MoveDock(moves: List<DuelMove>, selected: Move?, onSelect: (Move) -
     }
 }
 
+/** Theme colour for each move. */
 @Composable
 internal fun Move.tint(): Color {
     val c = GameTheme.colors
@@ -367,6 +376,7 @@ internal fun Move.tint(): Color {
     }
 }
 
+/** One tappable move card showing its icon, damage and stamina cost. Lifts when selected. */
 @Composable
 internal fun MoveCard(m: DuelMove, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = GameTheme.colors
@@ -417,6 +427,7 @@ internal fun MoveCard(m: DuelMove, selected: Boolean, onClick: () -> Unit, modif
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun FgtrPlatePrvw() {

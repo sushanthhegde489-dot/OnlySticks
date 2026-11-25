@@ -1,3 +1,5 @@
+// Circular countdown display for the turn timer.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.timer
 
 import androidx.compose.foundation.Canvas
@@ -48,8 +50,13 @@ import com.sushanth.onlysticks.domain.combat.TurnTmr
 import com.sushanth.onlysticks.domain.config.Cfg
 import com.sushanth.onlysticks.ui.theme.OnlySticksTheme
 
+/** Whole seconds left, rounded up (so 0.1s shows as 1). */
 fun TurnTmr.secsLeft(): Int = ((leftMs + 999) / 1000).toInt()
 
+/**
+ * Timer HUD driven by an external [TurnTmr]. Calls [onTick] every frame while running, and pauses/resumes
+ * the timer when the app goes to the background and comes back.
+ */
 @Composable
 fun CntdwnTmrHud(
     tmr: TurnTmr,
@@ -95,6 +102,7 @@ fun CntdwnTmrHud(
     }
     TmrDial(tmr, modifier, size)
 }
+/** Self-contained version that owns its own timer and calls [onAutoSkip] when it expires. */
 @Composable
 fun CntdwnTmrHud(
     onAutoSkip: () -> Unit,
@@ -118,6 +126,7 @@ fun CntdwnTmrHud(
         size = size,
     )
 }
+/** The dial itself: a shrinking ring and the seconds left. Pulses red in the last 3 seconds. */
 @Composable
 private fun TmrDial(tmr: TurnTmr, modifier: Modifier, size: Dp) {
     val seconds = tmr.secsLeft()
@@ -161,11 +170,13 @@ private fun TmrDial(tmr: TurnTmr, modifier: Modifier, size: Dp) {
         }
     }
 }
+/** Android Studio preview. */
 @Preview(name = "Timer")
 @Composable
 private fun CntdwnTmrHudPrvw() {
     OnlySticksTheme { CntdwnTmrHud(tmr = TurnTmr(leftMs = 4_200), onTick = {}) }
 }
+/** Android Studio preview (last seconds). */
 @Preview(name = "Timer urgent", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun CntdwnTmrHudUrgentPrvw() {

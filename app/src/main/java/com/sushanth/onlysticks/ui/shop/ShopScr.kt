@@ -1,3 +1,5 @@
+// Shop tab: booster packs and the weekly card store.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.shop
 
 import androidx.annotation.StringRes
@@ -48,12 +50,14 @@ import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.theme.GameTheme
 import java.time.Duration
 
+/** Shop screen wired to [ShopVm]. */
 @Composable
 fun ShopRoute(vm: ShopVm, bal: Long, modifier: Modifier = Modifier) {
     val st by vm.state.collectAsStateWithLifecycle()
     ShopScr(st, bal, vm::selectTab, vm::buyPack, vm::buyCard, vm::dismissShow, modifier)
 }
 
+/** Stateless shop layout with Packs / Cards tabs, messages and the pack reveal overlay. */
 @Composable
 fun ShopScr(
     state: ShopUiState,
@@ -87,6 +91,7 @@ fun ShopScr(
     }
 }
 
+/** Name string for each pack. */
 @StringRes
 fun packNameRes(type: PackType): Int = when (type) {
     PackType.COMMON -> R.string.pack_common
@@ -94,6 +99,7 @@ fun packNameRes(type: PackType): Int = when (type) {
     PackType.ULTRA -> R.string.pack_ultra
 }
 
+/** A pack for sale; the buy button is disabled when the player can't afford it. */
 @Composable
 private fun PackTile(type: PackType, canAfford: Boolean, onBuy: () -> Unit) {
     val c = GameTheme.colors
@@ -121,6 +127,7 @@ private fun PackTile(type: PackType, canAfford: Boolean, onBuy: () -> Unit) {
     }
 }
 
+/** Simple drawing of a booster pack in the given colour. */
 @Composable
 private fun PackArt(tint: Color) {
     val shape = RoundedCornerShape(12.dp)
@@ -133,6 +140,7 @@ private fun PackArt(tint: Color) {
     }
 }
 
+/** Weekly store: open/closed countdown and the offered cards with their prices. */
 @Composable
 private fun CardStore(store: CardStoreState?, bal: Long, busy: Boolean, onBuy: (Int) -> Unit) {
     val c = GameTheme.colors
@@ -178,6 +186,7 @@ private fun CardStore(store: CardStoreState?, bal: Long, busy: Boolean, onBuy: (
     }
 }
 
+/** Formats a duration like "2d 4h" or "35m" for store countdowns. */
 private fun formatSpan(ms: Long): String {
     val d = Duration.ofMillis(ms.coerceAtLeast(0))
     return when {
@@ -187,6 +196,7 @@ private fun formatSpan(ms: Long): String {
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun ShopScrPrvw() {

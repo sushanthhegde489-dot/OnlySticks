@@ -1,3 +1,5 @@
+// The artwork window on a card: background, stick illustration and rarity effects.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.card
 
 import androidx.compose.animation.core.LinearEasing
@@ -45,6 +47,10 @@ import com.sushanth.onlysticks.ui.components.readAnimrScl
 import com.sushanth.onlysticks.ui.theme.FrameCols
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/**
+ * Art area of a full card. Uses custom [art] if given, otherwise draws a stick or item icon.
+ * Rare+ cards get a shine; ultra-rare cards get animated sparkles.
+ */
 @Composable
 internal fun ArtWin(
     card: Card,
@@ -127,6 +133,7 @@ internal fun ArtWin(
     }
 }
 
+/** Twinkling sparkles drawn over ultra-rare artwork. */
 internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawUltraRareSparkles(
     gold: Color,
     outline: Color,
@@ -148,6 +155,7 @@ internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawUltraRareSpark
     }
 }
 
+/** Simple stick illustration with a coloured grip. */
 @Composable
 internal fun StickSilhouette(gripCol: Color, inset: androidx.compose.ui.unit.Dp = 14.dp) {
     val c = GameTheme.colors
@@ -192,6 +200,7 @@ internal fun StickSilhouette(gripCol: Color, inset: androidx.compose.ui.unit.Dp 
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun ArtWinPrvw() {

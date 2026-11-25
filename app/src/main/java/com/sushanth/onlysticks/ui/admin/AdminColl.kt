@@ -1,3 +1,5 @@
+// Admin "Collection" tab: lists every owned card and lets an admin edit or delete it.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.admin
 
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +40,7 @@ import com.sushanth.onlysticks.ui.components.ParchmentPanel
 import com.sushanth.onlysticks.ui.components.SegmentedTabs
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Collection tab wired to [AdminVm]. */
 @Composable
 internal fun AdminColl(cardList: List<Card>, trnrs: List<TrnrRecord>, vm: AdminVm, modifier: Modifier = Modifier) {
     AdminCollContent(
@@ -50,6 +53,7 @@ internal fun AdminColl(cardList: List<Card>, trnrs: List<TrnrRecord>, vm: AdminV
     )
 }
 
+/** Stateless list of all cards (trainers first) with an editor dialog for the tapped card. */
 @Composable
 internal fun AdminCollContent(
     cardList: List<Card>,
@@ -88,12 +92,14 @@ internal fun AdminCollContent(
     }
 }
 
+/** One-line summary of a card for the list. */
 private fun describe(card: Card, wins: Int?): String = when (card) {
     is Stick -> "D ${card.base.durability} · S ${card.base.speed} · A ${card.base.attack}" + card.tuning.joinToString("") { " · " + it.name.lowercase() }
     is PwrUp -> card.type.name.lowercase().replace('_', ' ')
     is Trnr -> "affinity ${card.affinity} · wins ${wins ?: 0}"
 }
 
+/** Dialog for editing a card's name, stats, tuning, type or trainer progress, with delete confirmation. */
 @Composable
 private fun CardEditor(
     card: Card,
@@ -160,6 +166,7 @@ private fun CardEditor(
     )
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun AdminCollPrvw() {

@@ -1,3 +1,5 @@
+// Pushes gameplay counters to Google Play Games events.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.account
 
 import android.app.Activity
@@ -10,9 +12,11 @@ import com.sushanth.onlysticks.data.repository.Stat
 import com.sushanth.onlysticks.data.repository.StatsRepository
 import kotlinx.coroutines.CancellationException
 
+/** Sends locally counted stats to Play Games when the user is signed in there. */
 class PlayStats(context: Context, private val stats: StatsRepository) {
     private val appContext = context.applicationContext
 
+    /** Uploads every unsent stat and marks it as sent. Fails quietly (stats will be retried later). */
     suspend fun push(act: Activity) {
         if (!isOn(appContext)) return
         try {
@@ -31,6 +35,7 @@ class PlayStats(context: Context, private val stats: StatsRepository) {
         }
     }
 
+    /** Maps each stat to its Play Games event id string resource. */
     private fun eventRes(stat: Stat): Int = when (stat) {
         Stat.PVE_PLAYED -> R.string.event_pve_played
         Stat.PVE_WON -> R.string.event_pve_won
@@ -43,6 +48,7 @@ class PlayStats(context: Context, private val stats: StatsRepository) {
     companion object {
         private const val TAG = "PlayStats"
 
+        /** Play Games is only enabled when a project id is configured in games-ids.xml. */
         fun isOn(ctx: Context) = ctx.getString(R.string.game_services_project_id).isNotBlank()
 
         fun init(ctx: Context) {

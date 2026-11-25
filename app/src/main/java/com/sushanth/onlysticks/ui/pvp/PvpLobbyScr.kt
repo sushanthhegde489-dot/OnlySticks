@@ -1,3 +1,5 @@
+// Play-a-friend lobby: choose stake cards, then host a game, join a nearby one or enter an address.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.pvp
 
 import android.content.pm.PackageManager
@@ -60,9 +62,14 @@ import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.theme.DispFont
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Android 17+ requires this runtime permission for local network access. */
 private const val LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
 private const val LOCAL_NETWORK_SDK = 37
 
+/**
+ * PvP lobby. Asks for the local-network permission when needed, browses for games while open,
+ * and lets the player pick 1-3 stake sticks before hosting or joining.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PvpLobbyScr(
@@ -194,6 +201,7 @@ fun PvpLobbyScr(
     }
 }
 
+/** List of nearby games with their stake value; join is enabled only when the stakes are close enough. */
 @Composable
 private fun NearbyGames(hosts: List<LanHost>, myBetVal: Int, joinOn: Boolean, onJoin: (LanHost) -> Unit) {
     val c = GameTheme.colors
@@ -241,6 +249,7 @@ private fun NearbyGames(hosts: List<LanHost>, myBetVal: Int, joinOn: Boolean, on
     }
 }
 
+/** Status panel for hosting/joining/handshaking/failure, with a cancel button. */
 @Composable
 private fun PhasePanel(phase: PvpPhase, onCancel: () -> Unit) {
     val c = GameTheme.colors
@@ -262,6 +271,7 @@ private fun PhasePanel(phase: PvpPhase, onCancel: () -> Unit) {
     }
 }
 
+/** Message for each failure reason. */
 private fun PvpFailure.msgRes(): Int = when (this) {
     PvpFailure.CANNOT_HOST -> R.string.pvp_fail_host
     PvpFailure.CANNOT_CONNECT -> R.string.pvp_fail_connect
@@ -272,6 +282,7 @@ private fun PvpFailure.msgRes(): Int = when (this) {
     PvpFailure.MY_LOADOUT_INVALID -> R.string.pvp_fail_my_deck
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun PvpLobbyScrPrvw() {

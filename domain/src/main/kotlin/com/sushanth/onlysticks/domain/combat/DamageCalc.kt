@@ -1,3 +1,5 @@
+// Damage formula. Kept separate from the engine so it can be unit-tested and shown in the UI.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.combat
 
 import com.sushanth.onlysticks.domain.config.Cfg
@@ -5,6 +7,7 @@ import com.sushanth.onlysticks.domain.model.Move
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+/** Every value that feeds into the damage formula for a single attack. */
 data class DamageInput(
     val move: Move,
     val stickAtk: Int,
@@ -19,7 +22,9 @@ data class DamageInput(
     val defenderDefensePct: Double = 0.0,
 )
 
+/** Damage maths shared by the combat engine and the move preview UI. */
 object DamageCalc {
+    /** Collects a [DamageInput] from the attacker's current state. */
     fun inputFor(attacker: Combatant, move: Move, crit: Boolean = false, defenderDefensePct: Double = 0.0): DamageInput {
         val stick = attacker.activeStick
         return DamageInput(
@@ -37,8 +42,14 @@ object DamageCalc {
         )
     }
 
+    /** Final damage, rounded half-up. */
     fun dmg(input: DamageInput): Int = roundHalfUp(rawDmg(input))
 
+    /**
+     * Unrounded damage:
+     * (base + attack x stickSpeed / divisor + playerSpeed / divisor) x durability% x crit x fire/wet,
+     * then the exhaustion and unarmed multipliers, then the defender's defence % reduction.
+     */
     fun rawDmg(input: DamageInput): Double {
         if (!input.move.isAtk) return 0.0
         val exh = input.move == Move.EXHAUSTION_STRIKE
@@ -61,8 +72,10 @@ object DamageCalc {
         return tot
     }
 
+    /** Damage reflected back to an attacker whose hit was parried (a fraction of their own raw damage). */
     fun counter(attackerRawDmg: Double, frac: Double, attackerDefensePct: Double = 0.0): Int =
         roundHalfUp(attackerRawDmg * frac * (1.0 - attackerDefensePct.coerceIn(0.0, 1.0)))
 
+    /** Rounds half away from zero using BigDecimal so 2.5 -> 3 consistently on every device. */
     fun roundHalfUp(value: Double): Int = BigDecimal(value).setScale(0, RoundingMode.HALF_UP).toInt()
 }

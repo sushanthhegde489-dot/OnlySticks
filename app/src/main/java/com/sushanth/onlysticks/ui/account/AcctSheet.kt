@@ -1,3 +1,5 @@
+// Bottom sheet showing the player's account: name, Google sign-in, Drive backup, stats and admin entry.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.account
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -41,6 +43,7 @@ import com.sushanth.onlysticks.ui.theme.OnlySticksTheme
 import java.text.DateFormat
 import java.util.Date
 
+/** Account bottom sheet wired to [AcctVm]. [onTut] replays the tutorial; [onOpenAdmin] opens the admin tools. */
 @Composable
 fun AcctSheet(viewModel: AcctVm, onDismiss: () -> Unit, onTut: () -> Unit, onOpenAdmin: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -57,6 +60,7 @@ fun AcctSheet(viewModel: AcctVm, onDismiss: () -> Unit, onTut: () -> Unit, onOpe
     )
 }
 
+/** Stateless content of the account sheet (also used by previews). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AcctSheetContent(
@@ -148,6 +152,7 @@ fun AcctSheetContent(
     }
 }
 
+/** Side effects for the account flow: launches the Drive consent screen and shows the restore / sign-out dialogs. */
 @Composable
 fun AcctFx(viewModel: AcctVm, state: AcctUiState) {
     val consent = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
@@ -188,6 +193,7 @@ fun AcctFx(viewModel: AcctVm, state: AcctUiState) {
     }
 }
 
+/** Android Studio preview. */
 @Preview(showBackground = true)
 @Composable
 private fun AcctSheetPrvw() {

@@ -1,3 +1,5 @@
+# R8 keep rules (currently none are needed; minification is off for release builds).
+# (Comments in this file were written by AI - Claude.)
 # Add project specific R8 rules here.
 # AGP will combine all keep rule files in src/main/keepRules to pass to R8
 #

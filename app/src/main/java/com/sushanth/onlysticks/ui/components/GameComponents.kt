@@ -1,3 +1,5 @@
+// Shared building blocks for the game's cartoon wood-and-parchment look: backgrounds, panels, buttons, bars and badges.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.components
 
 import android.content.Context
@@ -62,15 +64,20 @@ import androidx.compose.ui.unit.dp
 import com.sushanth.onlysticks.ui.theme.GameTheme
 import kotlin.math.sin
 
+/** Spring presets used for UI animations across the app. */
 object GameMotion {
+    /** Quick spring with little overshoot. */
     fun <T> snappy() = spring<T>(dampingRatio = 0.85f, stiffness = 322f)
+    /** Springy animation with a visible bounce. */
     fun <T> bouncy() = spring<T>(dampingRatio = 0.65f, stiffness = 158f)
 }
 
+/** Scale used to "squish" a button while it's pressed. */
 @Composable
 private fun animatedPressScl(prssd: Boolean): Float =
     animateFloatAsState(if (prssd) 0.92f else 1f, if (prssd) tween(80) else GameMotion.bouncy(), label = "press").value
 
+/** Full-screen game background behind every screen. */
 @Composable
 fun GameBg(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     val c = GameTheme.colors
@@ -108,6 +115,7 @@ fun GameBg(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Un
     )
 }
 
+/** Draws a wooden board (planks with grain, a darker bottom lip and optional gold trim) behind the content. */
 fun Modifier.woodBoard(crnr: Dp = 18.dp, lip: Dp = 4.dp, trim: Boolean = true): Modifier = this.drawBehind {
     val c = DayWood
     val r = CornerRadius(crnr.toPx())
@@ -135,6 +143,7 @@ fun Modifier.woodBoard(crnr: Dp = 18.dp, lip: Dp = 4.dp, trim: Boolean = true): 
     }
 }
 
+/** Wood colour palette for [woodBoard]. */
 private object DayWood {
     val light = Color(0xFFA86B38)
     val mid = Color(0xFF8A5528)
@@ -144,6 +153,7 @@ private object DayWood {
     val gold = Color(0xFFE8B84A)
 }
 
+/** A box drawn as a wooden board. */
 @Composable
 fun WoodPanel(
     modifier: Modifier = Modifier,
@@ -154,6 +164,7 @@ fun WoodPanel(
     Box(modifier.woodBoard(crnr).padding(bottom = 4.dp).padding(contentPadding), content = content)
 }
 
+/** A light parchment-coloured panel for text content. */
 @Composable
 fun ParchmentPanel(
     modifier: Modifier = Modifier,
@@ -173,8 +184,10 @@ fun ParchmentPanel(
     )
 }
 
+/** Visual styles for [ChunkyBtn]. */
 enum class BtnStyle { Primary, Secondary, Wood }
 
+/** Big chunky game button with a 3D lip that presses down, plays a tap sound when clicked. */
 @Composable
 fun ChunkyBtn(
     text: String,
@@ -248,6 +261,7 @@ fun ChunkyBtn(
         }
     }
 }
+/** Text with a thick outline (drawn by stacking a stroked copy behind the fill). */
 @Composable
 fun OutlinedTxt(
     text: String,
@@ -272,7 +286,9 @@ fun OutlinedTxt(
         Text(text = text, style = style, color = color, textAlign = textAlign, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
     }
 }
+/** Hides decorative duplicate text from screen readers. */
 private fun Modifier.clearSemantics(): Modifier = this.clearAndSetSemantics { }
+/** Animated progress bar (HP, stamina, durability). A "ghost" bar trails behind when the value drops. */
 @Composable
 fun StatBar(
     frac: Float,
@@ -313,6 +329,7 @@ fun StatBar(
         }
     }
 }
+/** Rounded pill showing an icon and a number (e.g. coin balance). */
 @Composable
 fun CoinsPill(amount: String, icon: ImageVector, modifier: Modifier = Modifier, contentDescription: String? = null) {
     val c = GameTheme.colors
@@ -329,6 +346,7 @@ fun CoinsPill(amount: String, icon: ImageVector, modifier: Modifier = Modifier, 
         OutlinedTxt(amount, style = MaterialTheme.typography.titleMedium, outlW = 2.dp)
     }
 }
+/** Circular badge with a coloured rim. */
 @Composable
 fun Medallion(
     modifier: Modifier = Modifier,
@@ -348,6 +366,7 @@ fun Medallion(
         content = content,
     )
 }
+/** Small coloured label. */
 @Composable
 fun GameBadge(text: String, modifier: Modifier = Modifier, color: Color = GameTheme.colors.leaf) {
     Box(
@@ -360,6 +379,7 @@ fun GameBadge(text: String, modifier: Modifier = Modifier, color: Color = GameTh
         OutlinedTxt(text, style = MaterialTheme.typography.labelLarge.copy(fontFamily = DispFont), outlW = 2.dp)
     }
 }
+/** Row of tabs where one option is selected. */
 @Composable
 fun SegmentedTabs(opts: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     val c = GameTheme.colors
@@ -384,10 +404,12 @@ fun SegmentedTabs(opts: List<String>, selected: Int, onSelect: (Int) -> Unit, mo
     }
 }
 
+/** The system "animator duration scale" (0 when the user turned animations off). */
 fun readAnimrScl(context: Context): Float = runCatching {
     Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 }.getOrDefault(1f)
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun GameCompsPrvw() {

@@ -1,3 +1,5 @@
+// Choreographs the animation, sound and haptics for one resolved round.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.arena.stage
 
 import android.content.Context
@@ -27,6 +29,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Plays [curPb] on the stage: resets transient poses, then plays action events (hits, parries, rests)
+ * one after another, then status effects (burns, breaks), then the KO if the match ended.
+ * Always lasts at least MIN_ROUND_MS so rounds don't flash by.
+ */
 internal suspend fun StageFx.play(curPb: RoundPb, context: Context, colors: GameCols, haptic: HapticFeedback): Unit = coroutineScope {
     val soundMgr = SoundMgr.get(context)
     flts.clear()
@@ -131,10 +138,14 @@ internal suspend fun StageFx.play(curPb: RoundPb, context: Context, colors: Game
     }
 }
 
+/** Delay before the first action animation. */
 private const val FIRST_ACTION_MS = 350L
+/** Gap between consecutive action animations. */
 private const val ACTION_GAP_MS = 550L
+/** Minimum total length of a round replay. */
 private const val MIN_ROUND_MS = 1700L
 
+/** Plays the individual animations for each kind of event. */
 private class RoundAnimr(
     private val fx: StageFx,
     private val scope: CoroutineScope,
@@ -143,6 +154,7 @@ private class RoundAnimr(
     private val haptic: HapticFeedback,
     private val sound: SoundMgr,
 ) {
+    /** Adds a floating number or bubble over the stage. */
     fun spawnFlt(
         text: String,
         xFrac: Float,
@@ -171,6 +183,7 @@ private class RoundAnimr(
         }
     }
 
+    /** Attack that landed: lunge, swing, knockback, flash, damage number, sound and haptic (bigger for crits). */
     fun hit(evt: CombatEvt.Hit) {
         val attackerAnim = fx.animFor(evt.attacker)
         val defender = evt.attacker.other
@@ -261,6 +274,7 @@ private class RoundAnimr(
         }
     }
 
+    /** Parried attack: block pose for the parrier and counter damage on the attacker. */
     fun countered(evt: CombatEvt.Countered) {
         sound.play(SoundFx.PARRY, volume = 0.95f)
         val parrierAnim = fx.animFor(evt.parrier)
@@ -306,6 +320,7 @@ private class RoundAnimr(
         )
     }
 
+    /** Both players parried: a clink spark between them. */
     fun clink() {
         sound.play(SoundFx.PARRY, volume = 0.8f, rate = 1.15f)
         scope.launch {
@@ -331,6 +346,7 @@ private class RoundAnimr(
         )
     }
 
+    /** Parry with nothing to block. */
     fun whiff(evt: CombatEvt.Whiff) {
         sound.play(SoundFx.WHOOSH, volume = 0.7f)
         val whoAnim = fx.animFor(evt.plr)
@@ -349,6 +365,7 @@ private class RoundAnimr(
         )
     }
 
+    /** Resting animation with stamina recovered. */
     fun rested(evt: CombatEvt.Rested) {
         sound.play(SoundFx.REST, volume = 0.65f)
         val whoAnim = fx.animFor(evt.plr)
@@ -367,6 +384,7 @@ private class RoundAnimr(
         )
     }
 
+    /** Status effects: switches, power-ups, burns, recoil and broken sticks. */
     fun status(evt: CombatEvt, yStagger: Float) {
         when (evt) {
             is CombatEvt.Burned -> {
@@ -449,6 +467,7 @@ private class RoundAnimr(
     }
 }
 
+/** Animates 0 to 1 then snaps back to 0 (used for one-shot bursts). */
 private suspend fun Animatable<Float, AnimationVector1D>.burst(
     durMs: Int,
     easing: Easing = FastOutSlowInEasing,

@@ -1,3 +1,5 @@
+// Admin tools screen (only reachable by allow-listed admin accounts).
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.admin
 
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +43,7 @@ import com.sushanth.onlysticks.ui.components.WoodPanel
 import com.sushanth.onlysticks.ui.shop.PackShow
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Admin screen wired to [AdminVm]: tabs for economy, card creation and the collection. */
 @Composable
 fun AdminScr(
     vm: AdminVm,
@@ -72,6 +75,7 @@ fun AdminScr(
     )
 }
 
+/** Stateless admin screen layout. */
 @Composable
 fun AdminScrContent(
     state: AdminUiState,
@@ -120,6 +124,7 @@ fun AdminScrContent(
     }
 }
 
+/** Economy tab: add/remove coins, open free packs and force the store open. */
 @Composable
 private fun EconomyPanel(
     bal: Long,
@@ -162,8 +167,10 @@ private fun EconomyPanel(
     }
 }
 
+/** Kinds of card the Create tab can make. */
 private enum class NewKind { STICK, LIGHTER, WATER, TRAINER }
 
+/** Create tab: build a stick (optionally with exact stats and tuning), a power-up or a trainer. */
 @Composable
 private fun CreatePanel(
     busy: Boolean,
@@ -228,6 +235,7 @@ private fun CreatePanel(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun AdminScrPrvw() {

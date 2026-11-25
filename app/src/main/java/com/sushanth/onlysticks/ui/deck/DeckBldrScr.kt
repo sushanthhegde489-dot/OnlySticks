@@ -1,3 +1,5 @@
+// Deck builder screen: the pinned deck shelf at the top and the filterable collection below.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.ui.deck
 
 import androidx.compose.foundation.clickable
@@ -51,6 +53,7 @@ import com.sushanth.onlysticks.ui.components.OutlinedTxt
 import com.sushanth.onlysticks.ui.components.ParchmentPanel
 import com.sushanth.onlysticks.ui.theme.GameTheme
 
+/** Filters for the collection grid. */
 internal enum class DeckCardFilt {
     ALL,
     COMMON,
@@ -62,6 +65,7 @@ internal enum class DeckCardFilt {
     TRAINER,
     ;
 
+    /** True if [card] belongs in this filter. */
     fun matches(card: Card): Boolean = when (this) {
         ALL -> true
         COMMON -> card is Stick && card.rarity == Rarity.COMMON
@@ -74,6 +78,7 @@ internal enum class DeckCardFilt {
     }
 }
 
+/** Chip label for a filter. */
 @Composable
 internal fun DeckCardFilt.label(): String = when (this) {
     DeckCardFilt.ALL -> stringResource(R.string.deck_filt_all)
@@ -86,6 +91,7 @@ internal fun DeckCardFilt.label(): String = when (this) {
     DeckCardFilt.TRAINER -> stringResource(R.string.card_code_trnr)
 }
 
+/** Deck builder wired to a [DeckBldrVm] created from [source]. */
 @Composable
 fun DeckBldrRoute(
     source: DeckBldrSrc,
@@ -104,6 +110,7 @@ fun DeckBldrRoute(
     )
 }
 
+/** Stateless deck builder. Tapping a collection card opens it full-size, where it can be renamed or added to the deck. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeckBldrScr(
@@ -223,6 +230,7 @@ fun DeckBldrScr(
     }
 }
 
+/** Android Studio preview. */
 @androidx.compose.ui.tooling.preview.Preview(showBackground = true)
 @Composable
 private fun DeckBldrScrPrvw() {

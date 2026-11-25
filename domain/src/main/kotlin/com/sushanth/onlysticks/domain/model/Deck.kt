@@ -1,7 +1,10 @@
+// Deck model and validation rules.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.model
 
 import com.sushanth.onlysticks.domain.config.Cfg
 
+/** A saved deck: up to DECK_SLOTS combat cards plus an optional trainer. */
 data class Deck(
     val id: String,
     val name: String,
@@ -11,13 +14,16 @@ data class Deck(
     val isFull: Boolean get() = cardList.size >= Cfg.DECK_SLOTS
 }
 
+/** Ways a deck can be invalid. */
 sealed interface DeckErr {
     data class TooManyCards(val count: Int, val limit: Int) : DeckErr
     data object TrnrInCombatDeck : DeckErr
     data object TooManyTrnrs : DeckErr
 }
 
+/** Validates decks before they are saved or taken into a match. */
 object DeckChecker {
+    /** Returns every rule the deck breaks (empty list = valid). [extraSlots] come from trainer rank. */
     fun validate(cardList: List<Card>, trnrs: List<Trnr>, extraSlots: Int = 0): List<DeckErr> {
         val errors = mutableListOf<DeckErr>()
         val limit = Cfg.DECK_SLOTS + extraSlots
@@ -26,6 +32,7 @@ object DeckChecker {
         if (trnrs.size > Cfg.TRAINER_SLOTS) errors += DeckErr.TooManyTrnrs
         return errors
     }
+    /** Convenience overload for a whole [Deck]. */
     fun validate(deck: Deck, extraSlots: Int = 0): List<DeckErr> =
         validate(deck.cardList, listOfNotNull(deck.trainer), extraSlots)
 }

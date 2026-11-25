@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- App manifest: permissions, the main activity, Health Connect integration and WorkManager setup. -->
+<!-- (Comments in this file were written by AI - Claude.) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Read daily step counts from Health Connect (turned into coins and trainer XP). -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
 
+    <!-- Network access for Google sign-in, Drive backup and local Wi-Fi PvP. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Needed on newer Android versions to find and connect to PvP games on the local network. -->
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
+    <!-- Lets the app check whether the Health Connect app is installed. -->
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
 
+    <!-- Auto-backup is on, but the backup rules exclude the encrypted database (its key cannot leave this device). -->
     <application
         android:name=".OnlySticksApplication"
         android:allowBackup="true"
@@ -23,9 +30,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.OnlySticks">
+        <!-- Google Play Games project id (empty unless configured in games-ids.xml). -->
         <meta-data
             android:name="com.google.android.gms.games.APP_ID"
             android:value="@string/game_services_project_id" />
+        <!-- Single activity that hosts the whole Compose UI. -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|density|uiMode"
@@ -37,6 +46,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Shown by Health Connect when the user asks why the app wants step access. -->
         <activity
             android:name=".health.PermissionsRationaleActivity"
             android:exported="true">
@@ -45,6 +55,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Android 14+ entry point for the same "why we need this permission" screen. -->
         <activity-alias
             android:name="ViewPermissionUsageActivity"
             android:exported="true"
@@ -56,6 +67,7 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Disables WorkManager's automatic start-up so the app can supply its own worker factory (see OnlySticksApplication). -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

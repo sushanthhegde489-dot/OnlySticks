@@ -1,3 +1,5 @@
+// Text encoding for PvP messages: cards, actions and raw bytes.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.pvp
 
 import com.sushanth.onlysticks.domain.model.BaseStats
@@ -15,11 +17,15 @@ import com.sushanth.onlysticks.domain.model.TurnAction
 import com.sushanth.onlysticks.domain.rng.Hash.hexToBytesOrNull
 import java.util.Base64
 
+/** Thrown when the peer sends something malformed. */
 class ProtocolException(message: String) : Exception(message)
 
+/** Serialises game objects to compact comma/semicolon separated strings for the wire. */
 object PvpCodec {
+    /** Placeholder for "no value". */
     private const val NONE = "-"
 
+    /** Base64url-encodes text so it can't contain spaces or newlines. */
     fun encodeTxt(text: String): String = Base64.getUrlEncoder().withoutPadding().encodeToString(text.encodeToByteArray())
 
     fun decodeTxt(enc: String): String = runCatching { Base64.getUrlDecoder().decode(enc).decodeToString() }
@@ -32,10 +38,12 @@ object PvpCodec {
 
     fun hexToBytes(hex: String): ByteArray = hex.hexToBytesOrNull() ?: throw ProtocolException("bad hex")
 
+    /** Cards are joined with ';'. */
     fun encodeCards(cardList: List<Card>): String = if (cardList.isEmpty()) NONE else cardList.joinToString(";", transform = ::encodeCard)
 
     fun decodeCards(text: String): List<Card> = if (text == NONE) emptyList() else text.split(";").map(::decodeCard)
 
+    /** Card format: S,id,rarity,dur,spd,atk,tuning | P,id,type | T,id,buff,affinity */
     fun encodeCard(card: Card): String = when (card) {
         is Stick -> listOf("S", card.id, card.rarity.code, card.base.durability, card.base.speed, card.base.attack,
             card.tuning.joinToString("") { it.name.take(1) }.ifEmpty { NONE }).joinToString(",")
@@ -55,6 +63,7 @@ object PvpCodec {
         }.getOrNull() ?: throw ProtocolException("bad card")
     }
 
+    /** Action format: move,switchSlot,powerUpSlot,target (each '-' when absent). */
     fun encodeAction(action: TurnAction): String =
         listOf(action.move?.name ?: NONE, action.swtchToSlot?.toString() ?: NONE, action.pwrUpSlot?.toString() ?: NONE, action.pwrUpTarget?.name ?: NONE)
             .joinToString(",")
@@ -72,6 +81,7 @@ object PvpCodec {
         }.getOrElse { throw ProtocolException("bad action") }
     }
 
+    /** Tuning flags are stored as their first letters, e.g. "WG". */
     private fun decodeTuning(text: String): Set<TuningFlag> =
         if (text == NONE) emptySet() else text.map { c -> TuningFlag.entries.first { it.name.first() == c } }.toSet()
 }

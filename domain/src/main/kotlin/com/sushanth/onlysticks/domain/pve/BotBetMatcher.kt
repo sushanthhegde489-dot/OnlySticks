@@ -1,3 +1,5 @@
+// Builds the bot's side of a card wager so it roughly matches the player's stake value.
+// (Comments in this file were written by AI - Claude.)
 package com.sushanth.onlysticks.domain.pve
 
 import com.sushanth.onlysticks.domain.appraisal.Appr
@@ -13,11 +15,14 @@ import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 
+/** Generates a bot stake (1-3 sticks) whose appraised value is within tolerance of the player's bet. */
 object BotBetMatcher {
+    /** A candidate stake shape: a list of rarities, with the min/max appraisal it could possibly reach. */
     private data class Plan(val rarities: List<Rarity>) {
         val minVal: Int = rarities.sumOf { ceil(mult(it) * minSum(it)).toInt() }
         val maxVal: Int = rarities.sumOf { floor(mult(it) * maxSum(it)).toInt() }
     }
+    /** Every combination of 1..3 rarities (order-independent) that is a legal bet size. */
     private val ALL_PLANS: List<Plan> = buildList {
         val r = Rarity.entries
         for (a in r.indices) {
@@ -28,6 +33,10 @@ object BotBetMatcher {
             }
         }
     }.filter { BetRules.validBetCnt(it.rarities.size) }
+    /**
+     * Returns sticks worth roughly [plrBetVal]. Tries plans weighted by the bot tier's rarity preferences
+     * until one lands within tolerance; otherwise returns the closest attempt (or the nearest plan as a fallback).
+     */
     fun matchBet(plrBetVal: Int, tier: Int, rng: DeterministicRng): List<Card> {
         val diff = BotDifficulty(tier)
         val target = plrBetVal.coerceAtLeast(0)
@@ -46,10 +55,12 @@ object BotBetMatcher {
         val fallback = ALL_PLANS.minBy { distance(it, target) }
         return build(fallback, target, tier, rng)
     }
+    /** Picks a plan index, favouring rarities this bot tier normally uses. */
     private fun pickPlan(plans: List<Plan>, diff: BotDifficulty, rng: DeterministicRng): Int {
         val weights = plans.map { plan -> plan.rarities.fold(1) { acc, r -> acc * diff.rarWeights[r.ordinal] } }
         return if (weights.sum() > 0) rng.weightedIdx(weights) else rng.nextInt(0, plans.size)
     }
+    /** Creates real sticks for a plan, splitting the target value across cards and each card's three stats. */
     private fun build(plan: Plan, target: Int, tier: Int, rng: DeterministicRng): List<Card> {
         val goal = target.coerceIn(plan.minVal, plan.maxVal)
         val values = splitExact(goal, plan.rarities.map { valRange(it) }, rng)
@@ -59,6 +70,7 @@ object BotBetMatcher {
             Stick("bot-$tier-stake-$n", rarity, BaseStats(d, s, a))
         }
     }
+    /** Randomly splits [tot] into values that each fall within the matching range and add up exactly to [tot]. */
     private fun splitExact(tot: Int, ranges: List<IntRange>, rng: DeterministicRng): List<Int> {
         var extra = tot - ranges.sumOf { it.first }
         return ranges.mapIndexed { i, range ->
@@ -69,8 +81,10 @@ object BotBetMatcher {
             range.first + give
         }
     }
+    /** True if stake [a] is closer to [target] than stake [b]. */
     private fun closer(a: List<Card>, b: List<Card>, target: Int) =
         abs(Appr.tot(a) - target) < abs(Appr.tot(b) - target)
+    /** How far [target] is outside the plan's achievable value range (0 if inside). */
     private fun distance(plan: Plan, target: Int): Int = when {
         target < plan.minVal -> plan.minVal - target
         target > plan.maxVal -> target - plan.maxVal

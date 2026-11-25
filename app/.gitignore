@@ -1,1 +1,3 @@
+# Ignore the app module's build output.
+# (Comments in this file were written by AI - Claude.)
 /build

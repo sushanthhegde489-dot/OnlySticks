@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play Games ids. Leave empty to disable Play Games; fill in from the Play Console to enable stats events. -->
+<!-- (Comments in this file were written by AI - Claude.) -->
 <resources>
     <string name="game_services_project_id" translatable="false"></string>
     <string name="event_pve_played" translatable="false"></string>
